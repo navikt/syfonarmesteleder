@@ -5,10 +5,10 @@ pipeline {
 
     environment {
         APPLICATION_NAME = 'syfonarmesteleder'
-        DISABLE_SLACK_MESSAGES = false
+        FASIT_ENVIRONMENT = 'q1'
         ZONE = 'fss'
-        DOCKER_SLUG='syfo'
-        FASIT_ENVIRONMENT='q1'
+        DOCKER_SLUG = 'syfo'
+        DISABLE_SLACK_MESSAGES = true
     }
 
     stages {
@@ -27,18 +27,33 @@ pipeline {
                 sh './gradlew test'
             }
         }
-        stage('Create uber jar') {
+        stage('create uber jar') {
             steps {
                 sh './gradlew shadowJar'
                 slackStatus status: 'passed'
             }
         }
-        stage('deploy') {
+        stage('push docker image') {
             steps {
                 dockerUtils action: 'createPushImage'
+            }
+        }
+        stage('validate & upload nais.yaml to nexus m2internal') {
+            steps {
                 nais action: 'validate'
                 nais action: 'upload'
+            }
+        }
+        stage('deploy to preprod') {
+            steps {
                 deployApp action: 'jiraPreprod'
+            }
+        }
+        stage('deploy to production') {
+            when { environment name: 'DEPLOY_TO', value: 'production' }
+            steps {
+                deployApp action: 'jiraProd'
+                githubStatus action: 'tagRelease'
             }
         }
     }
