@@ -1,20 +1,24 @@
 #!/usr/bin/env groovy
 
+import java.text.SimpleDateFormat
+
 pipeline {
     agent any
 
     environment {
         APPLICATION_NAME = 'syfonarmesteleder'
-        FASIT_ENVIRONMENT = 'q1'
-        ZONE = 'fss'
-        DOCKER_SLUG = 'syfo'
-        DISABLE_SLACK_MESSAGES = true
     }
 
     stages {
         stage('initialize') {
             steps {
-                init action: 'gradle'
+                script {
+                    sh './gradlew clean'
+                    def date = new Date()
+                    def dateFormat = new SimpleDateFormat("dd.MM.HHmm")
+                    env.COMMIT_HASH_SHORT = "${env.GIT_COMMIT}"[0..6]
+                    env.APPLICATION_VERSION = dateFormat.format(date) + "-${env.COMMIT_HASH_SHORT}"
+                }
             }
         }
         stage('build') {
@@ -30,42 +34,42 @@ pipeline {
         stage('create uber jar') {
             steps {
                 sh './gradlew shadowJar'
-                slackStatus status: 'passed'
             }
         }
         stage('push docker image') {
             steps {
-                dockerUtils action: 'createPushImage'
+                script {
+                    docker.withRegistry('https://repo.adeo.no:5443', 'nexus-credentials') {
+                        def image = docker.build("syfo/${APPLICATION_NAME}:${APPLICATION_VERSION}", "--pull --build-arg GIT_COMMIT_ID=${env.COMMIT_HASH_SHORT} --build-arg http_proxy=http://webproxy-internett.nav.no:8088 --build-arg https_proxy=http://webproxy-internett.nav.no:8088 .")
+                        image.push()
+                    }
+                }
             }
         }
-        stage('validate & upload nais.yaml to nexus m2internal') {
+        stage('update version in naiserator.yaml') {
             steps {
-                nais action: 'validate'
-                nais action: 'upload'
+                script {
+                    withEnv(['HTTPS_PROXY=http://webproxy-internett.nav.no:8088']) {
+                        withCredentials([string(credentialsId: 'OAUTH_TOKEN', variable: 'token')]) {
+                            def naiseratorFile = sh(script: "curl -s https://${token}@raw.githubusercontent.com/navikt/syfonais/master/preprod-fss/syfonarmesteleder/naiserator.yaml", returnStdout: true).trim()
+                            writeFile file: "naiserator.yaml", text: naiseratorFile
+                            def payload = readFile('naiserator.yaml').replaceAll("@@version@@", env.APPLICATION_VERSION)
+                            writeFile file: "naiserator.yaml", text: payload
+                        }
+                    }
+                }
             }
         }
+
         stage('deploy to preprod') {
             steps {
-                deployApp action: 'jiraPreprod'
+                script {
+                    withCredentials([file(credentialsId: env.KUBECONFIG ?: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply --context preprod-fss --namespace default -f naiserator.yaml'
+                        sh 'kubectl --context preprod-fss --namespace default rollout status -w deployment/${APPLICATION_NAME}'
+                    }
+                }
             }
-        }
-        stage('deploy to production') {
-            when { environment name: 'DEPLOY_TO', value: 'production' }
-            steps {
-                deployApp action: 'jiraProd'
-                githubStatus action: 'tagRelease'
-            }
-        }
-    }
-    post {
-        always {
-            postProcess action: 'always'
-        }
-        success {
-            postProcess action: 'success'
-        }
-        failure {
-            postProcess action: 'failure'
         }
     }
 }

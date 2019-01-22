@@ -15,14 +15,14 @@ fun Routing.registerNaisApi(
         livenessCheck: () -> Boolean = { true },
         collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 ) {
-    get("/is_alive") {
+    get("/isalive") {
         if (livenessCheck()) {
             call.respondText("I'm alive! :)")
         } else {
             call.respondText("I'm dead x_x", status = HttpStatusCode.InternalServerError)
         }
     }
-    get("/is_ready") {
+    get("/isready") {
         if (readynessCheck()) {
             call.respondText("I'm ready! :)")
         } else {
