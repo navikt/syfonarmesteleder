@@ -9,13 +9,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.forskuttering.ForskutteringsClient
+import no.nav.syfo.forskuttering.registrerForskutteringApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
-val log: Logger = LoggerFactory.getLogger("no.nav.syfo")
+
+val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = Environment()
@@ -52,6 +55,7 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
 }
 
 fun Application.initRouting(applicationState: ApplicationState) {
+    val forskutteringsClient = ForskutteringsClient("url")
     routing {
         registerNaisApi(
                 readynessCheck = {
@@ -61,5 +65,6 @@ fun Application.initRouting(applicationState: ApplicationState) {
                     applicationState.running
                 }
         )
+        registrerForskutteringApi(forskutteringsClient)
     }
 }
