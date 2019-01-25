@@ -25,6 +25,7 @@ repositories {
     maven { url "https://dl.bintray.com/kotlin/ktor" }
     maven { url 'https://repo.adeo.no/repository/maven-releases/' }
     maven { url "https://dl.bintray.com/spekframework/spek-dev" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx/"}
 }
 
 test {
@@ -47,6 +48,8 @@ dependencies {
 
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "net.logstash.logback:logstash-logback-encoder:$logstash_encoder_version"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.9.0"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:0.9.0"
 
     compile "io.ktor:ktor-gson:$ktor_version"
     compile "io.ktor:ktor-client-gson:$ktor_version"
@@ -60,8 +63,6 @@ dependencies {
 
     api "io.ktor:ktor-client-mock:$ktor_version"
     api "io.ktor:ktor-client-mock-jvm:$ktor_version"
-    api "io.ktor:ktor-client-mock-js:$ktor_version"
-    api "io.ktor:ktor-client-mock-native:$ktor_version"
 }
 
 compileKotlin {
