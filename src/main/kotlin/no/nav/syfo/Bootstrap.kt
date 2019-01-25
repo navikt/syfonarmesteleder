@@ -1,9 +1,17 @@
 package no.nav.syfo
 
 import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.GsonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.features.ContentNegotiation
+import io.ktor.gson.gson
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -23,8 +31,12 @@ val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = Environment()
     val applicationState = ApplicationState()
-
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
+        install(ContentNegotiation) {
+            gson {
+                setPrettyPrinting()
+            }
+        }
         initRouting(applicationState)
     }.start(wait = false)
 
@@ -54,8 +66,13 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
     }
 }
 
+@KtorExperimentalAPI
 fun Application.initRouting(applicationState: ApplicationState) {
-    val forskutteringsClient = ForskutteringsClient("url")
+    val forskutteringsClient = ForskutteringsClient("url", HttpClient(Apache) {
+        install(JsonFeature) {
+            serializer = GsonSerializer()
+        }
+    })
     routing {
         registerNaisApi(
                 readynessCheck = {
