@@ -10,15 +10,14 @@ import org.slf4j.MDC
 
 class ForskutteringsClient(private val endpointUrl: String, private val client: HttpClient) {
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktoerid: String, orgnr: String, authorization: String?): ForskutteringRespons =
-            client.get("$endpointUrl/hentNarmesteleder") {
+            client.get("$endpointUrl/api/$aktoerid/forskuttering") {
                 accept(ContentType.Application.Json)
                 headers {
                     append("Authorization", authorization.orEmpty())
                     append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id").orEmpty())
                     append("Nav-Callid", MDC.get("Nav-Callid").orEmpty())
                 }
-                parameter("aktoerid", aktoerid)
-                parameter("orgnr", orgnr)
+                parameter("orgnummer", orgnr)
             }
 
     class ForskutteringRespons(private val forskuttering: Forskuttering)

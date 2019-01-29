@@ -16,8 +16,11 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.io.ByteReadChannel
 import no.nav.syfo.ApplicationState
+import no.nav.syfo.getEnvironment
 import no.nav.syfo.initRouting
-import org.amshove.kluent.*
+import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldMatch
+import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -62,7 +65,7 @@ object ForskutteringApiSpek : Spek({
     describe("Forskutteringsapi returnerer BadRequest for ugyldig request") {
         with(TestApplicationEngine()) {
             start()
-            application.initRouting(applicationState)
+            application.initRouting(applicationState, getEnvironment())
             application.install(ContentNegotiation) {
                 gson {
                     setPrettyPrinting()
@@ -86,7 +89,7 @@ object ForskutteringApiSpek : Spek({
 
 val httpMockEngine: HttpClientEngine = MockEngine {
     when (this.url.fullUrl) {
-        "https://tjenester.nav.no/hentNarmesteleder?aktoerid=$aktoeridMedForskuttering&orgnr=333" -> {
+        "https://tjenester.nav.no/api/$aktoeridMedForskuttering/forskuttering?orgnummer=333" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,
@@ -94,7 +97,7 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }
-        "https://tjenester.nav.no/hentNarmesteleder?aktoerid=$aktoeridUtenForskuttering&orgnr=333" -> {
+        "https://tjenester.nav.no/api/$aktoeridUtenForskuttering/forskuttering?orgnummer=333" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,
@@ -102,7 +105,7 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }
-        "https://tjenester.nav.no/hentNarmesteleder?aktoerid=$aktoeridMedUkjentForskuttering&orgnr=333" -> {
+        "https://tjenester.nav.no/api/$aktoeridMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,

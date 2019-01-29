@@ -29,7 +29,7 @@ data class ApplicationState(var running: Boolean = true, var initialized: Boolea
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
-    val env = Environment()
+    val env = getEnvironment()
     val applicationState = ApplicationState()
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
         install(ContentNegotiation) {
@@ -37,7 +37,7 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
                 setPrettyPrinting()
             }
         }
-        initRouting(applicationState)
+        initRouting(applicationState, env)
     }.start(wait = false)
 
     try {
@@ -67,8 +67,8 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
 }
 
 @KtorExperimentalAPI
-fun Application.initRouting(applicationState: ApplicationState) {
-    val forskutteringsClient = ForskutteringsClient("url", HttpClient(Apache) {
+fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
+    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, HttpClient(Apache) {
         install(JsonFeature) {
             serializer = GsonSerializer()
         }
