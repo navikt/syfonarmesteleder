@@ -23,6 +23,7 @@ import org.spekframework.spek2.style.specification.describe
 
 const val aktoeridMedForskuttering = 123
 const val aktoeridUtenForskuttering = 999
+const val aktoeridMedUkjentForskuttering = 678
 
 @KtorExperimentalAPI
 object ForskutteringApiSpek : Spek({
@@ -50,6 +51,11 @@ object ForskutteringApiSpek : Spek({
                     response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"NEI\"\\n}")
                 }
             }
+            it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktoerid=$aktoeridMedUkjentForskuttering&orgnr=333")) {
+                    response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"UKJENT\"\\n}")
+                }
+            }
         }
     }
 
@@ -62,14 +68,12 @@ object ForskutteringApiSpek : Spek({
                     setPrettyPrinting()
                 }
             }
-
             it("Returnerer feilmelding hvis aktørid mangler") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnr=333")) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
                     response.content shouldNotEqual null
                 }
             }
-
             it("Returnerer feilmelding hvis orgnr mangler") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktoerid=$aktoeridMedForskuttering")) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
@@ -95,6 +99,14 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     call,
                     HttpStatusCode.OK,
                     ByteReadChannel("{\"forskuttering\":\"NEI\"}".toByteArray(Charsets.UTF_8)),
+                    headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+            )
+        }
+        "https://tjenester.nav.no/hentNarmesteleder?aktoerid=$aktoeridMedUkjentForskuttering&orgnr=333" -> {
+            MockHttpResponse(
+                    call,
+                    HttpStatusCode.OK,
+                    ByteReadChannel("{\"forskuttering\":\"UKJENT\"}".toByteArray(Charsets.UTF_8)),
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }

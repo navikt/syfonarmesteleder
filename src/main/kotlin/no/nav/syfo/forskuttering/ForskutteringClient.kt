@@ -9,9 +9,6 @@ import io.ktor.http.ContentType
 import org.slf4j.MDC
 
 class ForskutteringsClient(private val endpointUrl: String, private val client: HttpClient) {
-
-    fun hentNarmesteLeder(aktoerid: String, orgnr: String, authorization: String?): Forskuttering = Forskuttering.JA
-
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktoerid: String, orgnr: String, authorization: String?): ForskutteringRespons =
             client.get("$endpointUrl/hentNarmesteleder") {
                 accept(ContentType.Application.Json)
@@ -27,6 +24,6 @@ class ForskutteringsClient(private val endpointUrl: String, private val client: 
     class ForskutteringRespons(private val forskuttering: Forskuttering)
 
     enum class Forskuttering {
-        JA, NEI, VETIKKE, NULL
+        JA, NEI, UKJENT
     }
 }
