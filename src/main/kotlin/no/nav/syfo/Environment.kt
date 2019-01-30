@@ -8,13 +8,7 @@ const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 
 fun getEnvironment(): Environment {
     return if (appIsRunningLocally) {
-        val localEnv = Gson().fromJson(readFileDirectlyAsText(localEnvironmentPropertiesPath), LocalEnvironment::class.java)
-        Environment(
-                localEnv.applicationPort,
-                localEnv.applicationThreads,
-                localEnv.servicestranglerUrl,
-                VaultCredentials(localEnv.clientid, localEnv.clientsecret)
-        )
+        Gson().fromJson(readFileDirectlyAsText(localEnvironmentPropertiesPath), Environment::class.java)
     } else {
         Environment(
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -35,14 +29,6 @@ data class Environment(
 )
 
 data class VaultCredentials(
-        val clientid: String,
-        val clientsecret: String
-)
-
-private data class LocalEnvironment(
-        val applicationPort: Int,
-        val applicationThreads: Int,
-        val servicestranglerUrl: String,
         val clientid: String,
         val clientsecret: String
 )

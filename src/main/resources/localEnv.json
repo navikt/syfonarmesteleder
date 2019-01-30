@@ -2,6 +2,8 @@
   "applicationPort": "8080",
   "applicationThreads": "4",
   "servicestranglerUrl": "http://localhost",
-  "clientid": "12345",
-  "clientsecret": "9999999"
+  "credentials": {
+    "clientid": "12345",
+    "clientsecret": "9999999"
+  }
 }
