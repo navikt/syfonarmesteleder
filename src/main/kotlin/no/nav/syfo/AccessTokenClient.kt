@@ -12,7 +12,7 @@ class AccessTokenClient(private val aadAccessTokenUrl: String, private val clien
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
     suspend fun hentAccessToken(resource: String): String {
-        log.info("Henter token")
+        log.info("Henter token: {}?client_id={}&resource={}&grant_type=client_credentials&client_secret=XXX", aadAccessTokenUrl, client, resource)
         val response: AadAccessToken = client.post(aadAccessTokenUrl) {
             accept(ContentType.Application.Json)
             parameter("client_id", clientId)
