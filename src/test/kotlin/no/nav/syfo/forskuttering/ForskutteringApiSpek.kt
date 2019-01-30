@@ -15,6 +15,7 @@ import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.io.ByteReadChannel
+import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.getEnvironment
 import no.nav.syfo.initRouting
@@ -31,7 +32,7 @@ const val aktoridMedUkjentForskuttering = 678
 @KtorExperimentalAPI
 object ForskutteringApiSpek : Spek({
     val applicationState = ApplicationState()
-    val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", client)
+    val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", accessTokenClient, client)
 
     describe("Forskutteringsapi returnerer gyldig svar for gyldig request") {
         with(TestApplicationEngine()) {
@@ -113,6 +114,14 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }
+        "https://login.microsoftonline.com/token?client_id=clientid&resource=https%3A%2F%2Ftjenester.nav.no&grant_type=client_credentials&client_secret=clientsecret" -> {
+            MockHttpResponse(
+                    call,
+                    HttpStatusCode.OK,
+                    ByteReadChannel("{\"access_token\":\"xyz1234\"}".toByteArray(Charsets.UTF_8)),
+                    headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+            )
+        }
         else -> {
             error("Unhandled ${url.fullUrl}")
         }
@@ -124,6 +133,8 @@ val client = HttpClient(httpMockEngine) {
         serializer = GsonSerializer()
     }
 }
+
+val accessTokenClient = AccessTokenClient("https://login.microsoftonline.com/token", "clientid", "clientsecret", client)
 
 private val Url.hostWithPortIfRequired: String get() = if (port == protocol.defaultPort) host else hostWithPort
 private val Url.fullUrl: String get() = "${protocol.name}://$hostWithPortIfRequired$fullPath"

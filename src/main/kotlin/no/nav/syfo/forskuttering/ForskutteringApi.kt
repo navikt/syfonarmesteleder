@@ -33,7 +33,7 @@ fun Routing.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient
 
             log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorid, orgnummer)
 
-            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorid, orgnummer, request.authorization())
+            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorid, orgnummer)
             call.respond(arbeidsgiverForskutterer)
 
         } catch (e: IllegalArgumentException) {

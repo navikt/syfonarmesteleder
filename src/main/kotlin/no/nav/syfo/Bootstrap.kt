@@ -68,11 +68,13 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
 
 @KtorExperimentalAPI
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
-    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, HttpClient(Apache) {
+    val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
             serializer = GsonSerializer()
         }
-    })
+    }
+    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.credentials.clientid, env.credentials.clientsecret, httpClient)
+    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, accessTokenClient, httpClient)
     routing {
         registerNaisApi(
                 readynessCheck = {

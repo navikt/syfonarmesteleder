@@ -14,6 +14,7 @@ fun getEnvironment(): Environment {
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 getEnvVar("APPLICATION_THREADS", "4").toInt(),
                 getEnvVar("SERVICESTRANGLER_URL"),
+                getEnvVar("AADACCESSTOKEN_URL", "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token"),
                 Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
         )
     }
@@ -25,6 +26,7 @@ data class Environment(
         val applicationPort: Int,
         val applicationThreads: Int,
         val servicestranglerUrl: String,
+        val aadAccessTokenUrl: String,
         val credentials: VaultCredentials
 )
 
