@@ -24,9 +24,9 @@ import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-const val aktoeridMedForskuttering = 123
-const val aktoeridUtenForskuttering = 999
-const val aktoeridMedUkjentForskuttering = 678
+const val aktoridMedForskuttering = 123
+const val aktoridUtenForskuttering = 999
+const val aktoridMedUkjentForskuttering = 678
 
 @KtorExperimentalAPI
 object ForskutteringApiSpek : Spek({
@@ -45,17 +45,17 @@ object ForskutteringApiSpek : Spek({
                 }
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktoerid=$aktoeridMedForskuttering&orgnr=333")) {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorid=$aktoridMedForskuttering&orgnummer=333")) {
                     response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"JA\"\\n}")
                 }
             }
             it("Returnerer NEI hvis arbeidsgiver ikke forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktoerid=$aktoeridUtenForskuttering&orgnr=333")) {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorid=$aktoridUtenForskuttering&orgnummer=333")) {
                     response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"NEI\"\\n}")
                 }
             }
             it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktoerid=$aktoeridMedUkjentForskuttering&orgnr=333")) {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorid=$aktoridMedUkjentForskuttering&orgnummer=333")) {
                     response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"UKJENT\"\\n}")
                 }
             }
@@ -72,13 +72,13 @@ object ForskutteringApiSpek : Spek({
                 }
             }
             it("Returnerer feilmelding hvis aktørid mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnr=333")) {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnummer=333")) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
                     response.content shouldNotEqual null
                 }
             }
-            it("Returnerer feilmelding hvis orgnr mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktoerid=$aktoeridMedForskuttering")) {
+            it("Returnerer feilmelding hvis orgnummer mangler") {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorid=$aktoridMedForskuttering")) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
                     response.content shouldNotEqual null
                 }
@@ -89,7 +89,7 @@ object ForskutteringApiSpek : Spek({
 
 val httpMockEngine: HttpClientEngine = MockEngine {
     when (this.url.fullUrl) {
-        "https://tjenester.nav.no/api/$aktoeridMedForskuttering/forskuttering?orgnummer=333" -> {
+        "https://tjenester.nav.no/api/$aktoridMedForskuttering/forskuttering?orgnummer=333" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,
@@ -97,7 +97,7 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }
-        "https://tjenester.nav.no/api/$aktoeridUtenForskuttering/forskuttering?orgnummer=333" -> {
+        "https://tjenester.nav.no/api/$aktoridUtenForskuttering/forskuttering?orgnummer=333" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,
@@ -105,7 +105,7 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }
-        "https://tjenester.nav.no/api/$aktoeridMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
+        "https://tjenester.nav.no/api/$aktoridMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,

@@ -13,6 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.lang.IllegalArgumentException
+import java.util.*
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
@@ -21,18 +22,18 @@ fun Routing.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient
     get("/syfonarmesteleder/arbeidsgiverForskutterer") {
         val request = call.request
         try {
-            MDC.put("Nav-Callid", request.header("Nav-Callid"))
-            MDC.put("Nav-Consumer-Id", request.header("Nav-Consumer-Id"))
+            MDC.put("Nav-Callid", request.header("Nav-Callid") ?: UUID.randomUUID().toString())
+            MDC.put("Nav-Consumer-Id", request.header("Nav-Consumer-Id") ?: "syfonarmesteleder")
 
             val queryParameters: Parameters = request.queryParameters
-            val aktoerid: String = queryParameters["aktoerid"]?.takeIf { it.isNotEmpty() }
-                    ?: throw IllegalArgumentException("Aktoerid mangler")
-            val orgnr: String = queryParameters["orgnr"]?.takeIf { it.isNotEmpty() }
-                    ?: throw IllegalArgumentException("Orgnr mangler")
+            val aktorid: String = queryParameters["aktorid"]?.takeIf { it.isNotEmpty() }
+                    ?: throw IllegalArgumentException("Aktorid mangler")
+            val orgnummer: String = queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
+                    ?: throw IllegalArgumentException("Orgnummer mangler")
 
-            log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnr {}", aktoerid, orgnr)
+            log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorid, orgnummer)
 
-            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktoerid, orgnr, request.authorization())
+            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorid, orgnummer, request.authorization())
             call.respond(arbeidsgiverForskutterer)
 
         } catch (e: IllegalArgumentException) {
