@@ -19,10 +19,10 @@ class ForskutteringsClient(private val endpointUrl: String, private val client: 
                 }
                 parameter("orgnummer", orgnr)
             }
+}
 
-    class ForskutteringRespons(private val forskuttering: Forskuttering)
+class ForskutteringRespons(private val forskuttering: Forskuttering)
 
-    enum class Forskuttering {
-        JA, NEI, UKJENT
-    }
+enum class Forskuttering {
+    JA, NEI, UKJENT
 }
