@@ -4,7 +4,7 @@ buildscript {
     ext.ktor_version = '1.0.0'
     ext.logback_version = '1.2.3'
     ext.prometheus_version = '0.5.0'
-    ext.spek_version = "2.0.0-alpha.1"
+    ext.spek_version = "2.0.0-rc.1"
     ext.logstash_encoder_version = '5.1'
 }
 
@@ -25,6 +25,7 @@ repositories {
     maven { url "https://dl.bintray.com/kotlin/ktor" }
     maven { url 'https://repo.adeo.no/repository/maven-releases/' }
     maven { url "https://dl.bintray.com/spekframework/spek-dev" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx/"}
 }
 
 test {
@@ -43,10 +44,15 @@ dependencies {
     implementation "io.prometheus:simpleclient_hotspot:$prometheus_version"
     implementation "io.prometheus:simpleclient_common:$prometheus_version"
     implementation "io.ktor:ktor-server-netty:$ktor_version"
+    implementation "io.ktor:ktor-client-apache:$ktor_version"
 
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "net.logstash.logback:logstash-logback-encoder:$logstash_encoder_version"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.9.0"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:0.9.0"
 
+    compile "io.ktor:ktor-gson:$ktor_version"
+    compile "io.ktor:ktor-client-gson:$ktor_version"
 
     testImplementation "org.amshove.kluent:kluent:$kluent_version"
     testImplementation "org.spekframework.spek2:spek-dsl-jvm:$spek_version"
@@ -54,6 +60,9 @@ dependencies {
 
     testRuntimeOnly "org.spekframework.spek2:spek-runtime-jvm:$spek_version"
     testRuntimeOnly "org.spekframework.spek2:spek-runner-junit5:$spek_version"
+
+    api "io.ktor:ktor-client-mock:$ktor_version"
+    api "io.ktor:ktor-client-mock-jvm:$ktor_version"
 }
 
 compileKotlin {

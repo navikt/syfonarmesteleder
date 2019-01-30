@@ -18,7 +18,7 @@ object SelftestSpek : Spek({
     describe("Calling selftest with successful liveness and readyness tests") {
         with(TestApplicationEngine()) {
             start()
-            application.initRouting(applicationState)
+            application.initRouting(applicationState, getEnvironment())
 
             it("Returns ok on isalive") {
                 applicationState.running = true

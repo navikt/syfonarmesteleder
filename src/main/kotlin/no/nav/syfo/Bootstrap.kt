@@ -1,28 +1,43 @@
 package no.nav.syfo
 
 import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.GsonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.features.ContentNegotiation
+import io.ktor.gson.gson
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.forskuttering.ForskutteringsClient
+import no.nav.syfo.forskuttering.registrerForskutteringApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
-val log: Logger = LoggerFactory.getLogger("no.nav.syfo")
+
+val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
-    val env = Environment()
+    val env = getEnvironment()
     val applicationState = ApplicationState()
-
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
-        initRouting(applicationState)
+        install(ContentNegotiation) {
+            gson {
+                setPrettyPrinting()
+            }
+        }
+        initRouting(applicationState, env)
     }.start(wait = false)
 
     try {
@@ -51,7 +66,13 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
     }
 }
 
-fun Application.initRouting(applicationState: ApplicationState) {
+@KtorExperimentalAPI
+fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
+    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, HttpClient(Apache) {
+        install(JsonFeature) {
+            serializer = GsonSerializer()
+        }
+    })
     routing {
         registerNaisApi(
                 readynessCheck = {
@@ -61,5 +82,6 @@ fun Application.initRouting(applicationState: ApplicationState) {
                     applicationState.running
                 }
         )
+        registrerForskutteringApi(forskutteringsClient)
     }
 }
