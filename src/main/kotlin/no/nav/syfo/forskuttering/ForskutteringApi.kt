@@ -12,6 +12,7 @@ import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import java.lang.IllegalArgumentException
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
@@ -24,17 +25,19 @@ fun Routing.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient
             MDC.put("Nav-Consumer-Id", request.header("Nav-Consumer-Id"))
 
             val queryParameters: Parameters = request.queryParameters
-            val aktoerid: String? = queryParameters["aktoerid"]
-            val orgnr: String? = queryParameters["orgnr"]
+            val aktoerid: String = queryParameters["aktoerid"]?.takeIf { it.isNotEmpty() }
+                    ?: throw IllegalArgumentException("Aktoerid mangler")
+            val orgnr: String = queryParameters["orgnr"]?.takeIf { it.isNotEmpty() }
+                    ?: throw IllegalArgumentException("Orgnr mangler")
 
             log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnr {}", aktoerid, orgnr)
 
-            if (aktoerid?.isNotEmpty() == true && orgnr?.isNotEmpty() == true) {
-                val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktoerid, orgnr, request.authorization())
-                call.respond(arbeidsgiverForskutterer)
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "Aktoerid og/eller orgnr mangler")
-            }
+            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktoerid, orgnr, request.authorization())
+            call.respond(arbeidsgiverForskutterer)
+
+        } catch (e: IllegalArgumentException) {
+            log.warn("Kan ikke hente forskuttering: {}", e.message)
+            call.respond(HttpStatusCode.BadRequest, e.message!!)
         } finally {
             MDC.remove("Nav-Callid")
             MDC.remove("Nav-Consumer-Id")
