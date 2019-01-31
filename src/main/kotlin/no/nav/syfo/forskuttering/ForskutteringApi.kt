@@ -25,14 +25,14 @@ fun Routing.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient
             MDC.put("Nav-Consumer-Id", request.header("Nav-Consumer-Id") ?: "syfonarmesteleder")
 
             val queryParameters: Parameters = request.queryParameters
-            val aktorid: String = queryParameters["aktorid"]?.takeIf { it.isNotEmpty() }
+            val aktorId: String = queryParameters["aktorId"]?.takeIf { it.isNotEmpty() }
                     ?: throw IllegalArgumentException("Aktorid mangler")
             val orgnummer: String = queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
                     ?: throw IllegalArgumentException("Orgnummer mangler")
 
-            log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorid, orgnummer)
+            log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorId, orgnummer)
 
-            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorid, orgnummer, request.authorization())
+            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorId, orgnummer, request.authorization())
             call.respond(arbeidsgiverForskutterer)
 
         } catch (e: IllegalArgumentException) {

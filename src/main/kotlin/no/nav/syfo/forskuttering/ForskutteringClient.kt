@@ -9,8 +9,8 @@ import io.ktor.http.ContentType
 import org.slf4j.MDC
 
 class ForskutteringsClient(private val endpointUrl: String, private val client: HttpClient) {
-    suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktorid: String, orgnummer: String, authorization: String?): ForskutteringRespons =
-            client.get("$endpointUrl/api/$aktorid/forskuttering") {
+    suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktorId: String, orgnummer: String, authorization: String?): ForskutteringRespons =
+            client.get("$endpointUrl/api/$aktorId/forskuttering") {
                 accept(ContentType.Application.Json)
                 headers {
                     append("Authorization", authorization.orEmpty())
