@@ -12,7 +12,6 @@ import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import java.lang.IllegalArgumentException
 import java.util.*
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
