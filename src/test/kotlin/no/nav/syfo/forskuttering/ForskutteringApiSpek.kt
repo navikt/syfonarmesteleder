@@ -114,7 +114,7 @@ val httpMockEngine: HttpClientEngine = MockEngine {
                     headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
             )
         }
-        "https://login.microsoftonline.com/token?client_id=clientid&resource=https%3A%2F%2Ftjenester.nav.no&grant_type=client_credentials&client_secret=clientsecret" -> {
+        "https://login.microsoftonline.com/token" -> {
             MockHttpResponse(
                     call,
                     HttpStatusCode.OK,

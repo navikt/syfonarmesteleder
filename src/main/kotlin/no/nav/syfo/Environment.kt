@@ -14,7 +14,7 @@ fun getEnvironment(): Environment {
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 getEnvVar("APPLICATION_THREADS", "4").toInt(),
                 getEnvVar("SERVICESTRANGLER_URL"),
-                getEnvVar("AADACCESSTOKEN_URL", "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token"),
+                getEnvVar("AADACCESSTOKEN_URL"),
                 Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
         )
     }
