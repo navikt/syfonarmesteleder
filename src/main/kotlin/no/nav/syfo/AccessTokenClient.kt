@@ -6,6 +6,7 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -16,6 +17,7 @@ class AccessTokenClient(private val aadAccessTokenUrl: String, private val clien
         log.info("Henter token")
         val response: AadAccessToken = client.post(aadAccessTokenUrl) {
             accept(ContentType.Application.Json)
+            method = HttpMethod.Post
             body = MultiPartFormDataContent(formData {
                 append("client_id", clientId)
                 append("resource", resource)

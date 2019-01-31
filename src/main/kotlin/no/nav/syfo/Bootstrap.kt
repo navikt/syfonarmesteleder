@@ -19,14 +19,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import io.ktor.client.features.logging.DEFAULT
+import io.ktor.client.features.logging.LogLevel
+import io.ktor.client.features.logging.Logger
+import io.ktor.client.features.logging.Logging
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
-
-val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = getEnvironment()
@@ -71,6 +71,10 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
     val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
             serializer = GsonSerializer()
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.HEADERS
         }
     }
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.credentials.clientid, env.credentials.clientsecret, httpClient)
