@@ -25,6 +25,8 @@ import io.ktor.client.features.logging.DEFAULT
 import io.ktor.client.features.logging.LogLevel
 import io.ktor.client.features.logging.Logger
 import io.ktor.client.features.logging.Logging
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import java.net.ProxySelector
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 
@@ -75,6 +77,11 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
         install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.HEADERS
+        }
+        engine {
+            customizeClient {
+                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+            }
         }
     }
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.credentials.clientid, env.credentials.clientsecret, httpClient)
