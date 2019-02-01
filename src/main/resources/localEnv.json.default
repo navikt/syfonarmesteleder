@@ -1,0 +1,11 @@
+{
+    "applicationPort": "8080",
+    "applicationThreads": "4",
+    "servicestranglerUrl": "http://localhost",
+    "servicestranglerId": "8888888",
+    "aadAccessTokenUrl": "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token",
+    "clientid": "999999",
+    "credentials": {
+      "clientsecret": "12345"
+    }
+}
