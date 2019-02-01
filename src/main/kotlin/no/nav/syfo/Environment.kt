@@ -14,7 +14,9 @@ fun getEnvironment(): Environment {
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 getEnvVar("APPLICATION_THREADS", "4").toInt(),
                 getEnvVar("SERVICESTRANGLER_URL"),
+                getEnvVar("SERVICESTRANGLER_ID"),
                 getEnvVar("AADACCESSTOKEN_URL"),
+                getEnvVar("CLIENT_ID"),
                 Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
         )
     }
@@ -26,12 +28,13 @@ data class Environment(
         val applicationPort: Int,
         val applicationThreads: Int,
         val servicestranglerUrl: String,
+        val servicestranglerId: String,
         val aadAccessTokenUrl: String,
+        val clientid: String,
         val credentials: VaultCredentials
 )
 
 data class VaultCredentials(
-        val clientid: String,
         val clientsecret: String
 )
 
