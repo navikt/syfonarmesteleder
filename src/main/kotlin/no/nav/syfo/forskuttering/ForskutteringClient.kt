@@ -15,7 +15,7 @@ class ForskutteringsClient(private val endpointUrl: String, private val resource
         return client.get("$endpointUrl/api/$aktorId/forskuttering") {
             accept(ContentType.Application.Json)
             headers {
-                append("Authorization", accessToken)
+                append("Authorization", "Bearer $accessToken")
                 append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }
