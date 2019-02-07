@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import java.io.File
 
 const val vaultApplicationPropertiesPath = "/var/run/secrets/nais.io/vault/secrets.json"
-const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
+const val localEnvironmentPropertiesPath = "./src/main/resources/localEnvForTests.json"
 
 fun getEnvironment(): Environment {
     return if (appIsRunningLocally) {
