@@ -9,7 +9,12 @@ import io.ktor.http.ContentType
 import no.nav.syfo.AccessTokenClient
 import org.slf4j.MDC
 
-class ForskutteringsClient(private val endpointUrl: String, private val resourceId: String, private val accessTokenClient: AccessTokenClient, private val client: HttpClient) {
+class ForskutteringsClient(
+        private val endpointUrl: String,
+        private val resourceId: String,
+        private val accessTokenClient: AccessTokenClient,
+        private val client: HttpClient
+) {
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktorId: String, orgnummer: String): ForskutteringRespons {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
         return client.get("$endpointUrl/api/$aktorId/forskuttering") {

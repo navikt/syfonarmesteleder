@@ -10,7 +10,12 @@ import io.ktor.http.Parameters
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class AccessTokenClient(private val aadAccessTokenUrl: String, private val clientId: String, private val clientSecret: String, private val client: HttpClient) {
+class AccessTokenClient(
+        private val aadAccessTokenUrl: String,
+        private val clientId: String,
+        private val clientSecret: String,
+        private val client: HttpClient
+) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
     suspend fun hentAccessToken(resource: String): String {
@@ -30,7 +35,7 @@ class AccessTokenClient(private val aadAccessTokenUrl: String, private val clien
     }
 }
 
-private class AadAccessToken(
+private data class AadAccessToken(
         val access_token: String,
         val token_type: String,
         val expires_in: String,
