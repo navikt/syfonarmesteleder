@@ -55,6 +55,8 @@ dependencies {
 
     compile "io.ktor:ktor-gson:$ktor_version"
     compile "io.ktor:ktor-client-gson:$ktor_version"
+    compile "io.ktor:ktor-auth:$ktor_version"
+    compile "io.ktor:ktor-auth-jwt:$ktor_version"
 
     testImplementation "org.amshove.kluent:kluent:$kluent_version"
     testImplementation "org.spekframework.spek2:spek-dsl-jvm:$spek_version"
