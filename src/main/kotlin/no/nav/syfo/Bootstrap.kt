@@ -42,7 +42,7 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
     val authorizedUsers = listOf(env.syfosoknadId)
     val applicationState = ApplicationState()
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
-        val jwkProvider = JwkProviderBuilder(URL(env.aadDiscoveryUrl))
+        val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
                 .cached(10, 24, TimeUnit.HOURS)
                 .rateLimited(10, 1, TimeUnit.MINUTES)
                 .build()
