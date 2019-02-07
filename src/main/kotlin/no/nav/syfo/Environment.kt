@@ -18,6 +18,7 @@ fun getEnvironment(): Environment {
                 getEnvVar("AADACCESSTOKEN_URL"),
                 getEnvVar("AADDISCOVERY_URL"),
                 getEnvVar("JWKKEYS_URL", "https://login.microsoftonline.com/common/discovery/keys"),
+                getEnvVar("JWT_ISSUER"),
                 getEnvVar("SYFOSOKNAD_ID"),
                 getEnvVar("CLIENT_ID"),
                 Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
@@ -35,6 +36,7 @@ data class Environment(
         val aadAccessTokenUrl: String,
         val aadDiscoveryUrl: String,
         val jwkKeysUrl: String,
+        val jwtIssuer: String,
         val syfosoknadId: String,
         val clientid: String,
         val credentials: VaultCredentials

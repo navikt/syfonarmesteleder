@@ -53,7 +53,7 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
         }
         install(Authentication) {
             jwt {
-                verifier(jwkProvider)
+                verifier(jwkProvider, env.jwtIssuer)
                 realm = "Syfonarmesteleder"
                 validate { credentials ->
                     val appid: String = credentials.payload.getClaim("appid").asString()
