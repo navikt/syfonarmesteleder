@@ -3,12 +3,10 @@ package no.nav.syfo.forskuttering
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
-import io.ktor.request.authorization
 import io.ktor.request.header
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -16,7 +14,6 @@ import java.util.*
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
-@KtorExperimentalAPI
 fun Routing.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient) {
     get("/syfonarmesteleder/arbeidsgiverForskutterer") {
         val request = call.request
@@ -26,13 +23,13 @@ fun Routing.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient
 
             val queryParameters: Parameters = request.queryParameters
             val aktorId: String = queryParameters["aktorId"]?.takeIf { it.isNotEmpty() }
-                    ?: throw IllegalArgumentException("Aktorid mangler")
+                    ?: throw IllegalArgumentException("AktorId mangler")
             val orgnummer: String = queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
                     ?: throw IllegalArgumentException("Orgnummer mangler")
 
             log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorId, orgnummer)
 
-            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorId, orgnummer, request.authorization())
+            val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorId, orgnummer)
             call.respond(arbeidsgiverForskutterer)
 
         } catch (e: IllegalArgumentException) {

@@ -6,12 +6,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.logging.DEFAULT
+import io.ktor.client.features.logging.LogLevel
+import io.ktor.client.features.logging.Logger
+import io.ktor.client.features.logging.Logging
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,14 +22,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import java.net.ProxySelector
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
-
-val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = getEnvironment()
@@ -66,13 +67,23 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
     }
 }
 
-@KtorExperimentalAPI
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
-    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, HttpClient(Apache) {
+    val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
             serializer = GsonSerializer()
         }
-    })
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.HEADERS
+        }
+        engine {
+            customizeClient {
+                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+            }
+        }
+    }
+    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClient)
+    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
     routing {
         registerNaisApi(
                 readynessCheck = {
