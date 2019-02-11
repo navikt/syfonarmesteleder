@@ -103,7 +103,7 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
         }
         install(Logging) {
             logger = Logger.DEFAULT
-            level = LogLevel.HEADERS
+            level = LogLevel.INFO
         }
         engine {
             customizeClient {
