@@ -1,6 +1,8 @@
 package no.nav.syfo.forskuttering
 
 import io.ktor.application.install
+import io.ktor.auth.authentication
+import io.ktor.auth.jwt.jwt
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
@@ -10,6 +12,7 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
 import io.ktor.http.*
+import io.ktor.request.uri
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
@@ -35,6 +38,7 @@ object ForskutteringApiSpek : Spek({
     describe("Forskutteringsapi returnerer gyldig svar for gyldig request") {
         with(TestApplicationEngine()) {
             start()
+            initTestAuthentication()
             application.routing {
                 registrerForskutteringApi(forskutteringsClient)
             }
@@ -64,6 +68,7 @@ object ForskutteringApiSpek : Spek({
     describe("Forskutteringsapi returnerer BadRequest for ugyldig request") {
         with(TestApplicationEngine()) {
             start()
+            initTestAuthentication()
             application.initRouting(applicationState, getEnvironment())
             application.install(ContentNegotiation) {
                 gson {
@@ -136,3 +141,13 @@ val accessTokenClient = AccessTokenClient("https://login.microsoftonline.com/tok
 
 private val Url.hostWithPortIfRequired: String get() = if (port == protocol.defaultPort) host else hostWithPort
 private val Url.fullUrl: String get() = "${protocol.name}://$hostWithPortIfRequired$fullPath"
+
+private fun TestApplicationEngine.initTestAuthentication() {
+    application.authentication {
+        jwt {
+            skipWhen { call ->
+                call.request.uri.contains("arbeidsgiverForskutterer")
+            }
+        }
+    }
+}

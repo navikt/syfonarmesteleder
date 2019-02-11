@@ -1,8 +1,11 @@
 package no.nav.syfo
 
+import io.ktor.auth.authentication
+import io.ktor.auth.jwt.jwt
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import io.ktor.request.uri
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
@@ -18,6 +21,7 @@ object SelftestSpek : Spek({
     describe("Calling selftest with successful liveness and readyness tests") {
         with(TestApplicationEngine()) {
             start()
+            initTestAuthentication()
             application.initRouting(applicationState, getEnvironment())
 
             it("Returns ok on isalive") {
@@ -61,6 +65,7 @@ object SelftestSpek : Spek({
     describe("Calling selftests with unsucessful liveness test") {
         with(TestApplicationEngine()) {
             start()
+            initTestAuthentication()
             application.routing {
                 registerNaisApi(readynessCheck = { true }, livenessCheck = { false })
             }
@@ -77,6 +82,7 @@ object SelftestSpek : Spek({
     describe("Calling selftests with unsucessful readyness test") {
         with(TestApplicationEngine()) {
             start()
+            initTestAuthentication()
             application.routing {
                 registerNaisApi(readynessCheck = { false }, livenessCheck = { true })
             }
@@ -90,3 +96,13 @@ object SelftestSpek : Spek({
         }
     }
 })
+
+private fun TestApplicationEngine.initTestAuthentication() {
+    application.authentication {
+        jwt {
+            skipWhen { call ->
+                call.request.uri.contains("localhost")
+            }
+        }
+    }
+}

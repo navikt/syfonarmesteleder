@@ -4,6 +4,10 @@
     "servicestranglerUrl": "http://localhost",
     "servicestranglerId": "8888888",
     "aadAccessTokenUrl": "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token",
+    "aadDiscoveryUrl": "https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration",
+    "jwkKeysUrl": "https://login.microsoftonline.com/common/discovery/keys",
+    "jwtIssuer": "https://sts.windows.net/XXXXXXXX/",
+    "syfosoknadId": "555555",
     "clientid": "999999",
     "credentials": {
       "clientsecret": "12345"
