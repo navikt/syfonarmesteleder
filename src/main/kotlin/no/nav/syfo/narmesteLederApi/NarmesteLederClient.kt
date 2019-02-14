@@ -16,12 +16,12 @@ class NarmesteLederClient(
         private val accessTokenClient: AccessTokenClient,
         private val client: HttpClient
 ) {
-    suspend fun hentNarmesteLederFraSyfoserviceStrangler(hrAktorId: String, orgnummer: String): List<NarmesteLeder> {
-//        val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get("$endpointUrl/api/hrtilganger/$hrAktorId/$orgnummer") {
+    suspend fun hentNarmesteLederFraSyfoserviceStrangler(hrAktorId: String): List<NarmesteLeder> {
+        val accessToken = accessTokenClient.hentAccessToken(resourceId)
+        return client.get("$endpointUrl/api/$hrAktorId/narmesteleder") {
             accept(ContentType.Application.Json)
             headers {
-//                append("Authorization", "Bearer $accessToken")
+                append("Authorization", "Bearer $accessToken")
                 append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }

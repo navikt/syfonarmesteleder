@@ -5,6 +5,7 @@ import com.google.gson.JsonDeserializer
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
+import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import io.ktor.client.HttpClient
@@ -25,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.narmesteLederApi.NarmesteLederClient
 import no.nav.syfo.narmesteLederApi.registrerNarmesteLederApi
@@ -123,7 +125,9 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
         }
     }
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClient)
-    val forskutteringsClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+    val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+
     routing {
         registerNaisApi(
                 readynessCheck = {
@@ -133,9 +137,9 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
                     applicationState.running
                 }
         )
-//        authenticate {
-        registrerForskutteringApi(forskutteringsClient)
-        registrerNarmesteLederApi(forskutteringsClient)
-//        }
+        authenticate {
+            registrerForskutteringApi(forskutteringsClient)
+            registrerNarmesteLederApi(narmesteLederClient)
+        }
     }
 }

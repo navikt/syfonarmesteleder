@@ -2,10 +2,10 @@ package no.nav.syfo.narmesteLederApi
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.Parameters
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
+import no.nav.syfo.narmesteLederApi.Tilgang.*
 import no.nav.syfo.traceinterceptor.withTraceInterceptor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -13,19 +13,23 @@ import org.slf4j.LoggerFactory
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
-    get("/syfonarmesteleder/hrtilganger/{hrAktorId}/{orgnummer}") {
+    get("/syfonarmesteleder/{hrAktorId}/hrtilganger") {
         withTraceInterceptor {
             try {
                 val hrAktorId: String = call.parameters["hrAktorId"]?.takeIf { it.isNotEmpty() }
                         ?: throw IllegalArgumentException("HrAktorId mangler")
-                val orgnummer: String = call.parameters["orgnummer"]?.takeIf { it.isNotEmpty() }
-                        ?: throw IllegalArgumentException("Orgnummer mangler")
 
-                log.info("Mottatt forespørsel om nærmeste leder-barn for aktør {} og orgnummer {}", hrAktorId, orgnummer)
+                log.info("Mottatt forespørsel om nærmeste leder-barn for aktør {}", hrAktorId)
 
-                val ledere = narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(hrAktorId, orgnummer)
+                val narmesteLeder = narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(hrAktorId)
+                        .map { narmesteLeder ->
+                            Entitet(
+                                    aktor = narmesteLeder.aktorId,
+                                    orgnummer = narmesteLeder.orgnummer,
+                                    tilganger = listOf(SYKMELDING, SYKEPENGESOKNAD, MOTE, OPPFOLGINGSPLAN))
+                        }
 
-                call.respond(ledere)
+                call.respond(TilgangRespons(narmesteLeder, emptyList()))
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente forskuttering: {}", e.message)
@@ -43,7 +47,6 @@ data class TilgangRespons(
 data class Entitet(
         val aktor: String? = null,
         val orgnummer: String,
-        val skrivetilgang: Boolean,
         val tilganger: List<Tilgang>
 )
 

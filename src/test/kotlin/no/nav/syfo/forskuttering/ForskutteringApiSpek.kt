@@ -34,7 +34,7 @@ const val aktorIdMedUkjentForskuttering = 678
 
 object ForskutteringApiSpek : Spek({
     val applicationState = ApplicationState()
-    val forskutteringsClient = NarmesteLederClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
+    val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
 
     describe("Forskutteringsapi returnerer gyldig svar for gyldig request") {
         with(TestApplicationEngine()) {
