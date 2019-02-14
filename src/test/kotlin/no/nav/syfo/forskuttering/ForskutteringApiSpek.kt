@@ -21,6 +21,7 @@ import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.getEnvironment
 import no.nav.syfo.initRouting
+import no.nav.syfo.narmesteLederApi.NarmesteLederClient
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldMatch
 import org.amshove.kluent.shouldNotEqual
@@ -33,7 +34,7 @@ const val aktorIdMedUkjentForskuttering = 678
 
 object ForskutteringApiSpek : Spek({
     val applicationState = ApplicationState()
-    val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
+    val forskutteringsClient = NarmesteLederClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
 
     describe("Forskutteringsapi returnerer gyldig svar for gyldig request") {
         with(TestApplicationEngine()) {
