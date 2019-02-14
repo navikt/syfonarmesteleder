@@ -19,7 +19,7 @@ class AccessTokenClient(
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
     suspend fun hentAccessToken(resource: String): String {
-        log.info("Henter token")
+        log.trace("Henter token fra Azure AD")
         val response: AadAccessToken = client.post(aadAccessTokenUrl) {
             accept(ContentType.Application.Json)
             method = HttpMethod.Post
@@ -30,7 +30,7 @@ class AccessTokenClient(
                 append("client_secret", clientSecret)
             })
         }
-        log.info("Har hentet accesstoken")
+        log.trace("Har hentet accesstoken")
         return response.access_token
     }
 }
