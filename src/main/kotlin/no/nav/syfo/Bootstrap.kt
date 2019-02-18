@@ -22,8 +22,7 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.forskuttering.ForskutteringsClient
@@ -42,65 +41,42 @@ data class ApplicationState(var running: Boolean = true, var initialized: Boolea
 
 private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
-fun main(args: Array<String>) {
-    runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
-        val env = getEnvironment()
-        val authorizedUsers = listOf(env.syfosoknadId)
-        val applicationState = ApplicationState()
-        val applicationServer = embeddedServer(Netty, env.applicationPort) {
-            val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
-                    .cached(10, 24, TimeUnit.HOURS)
-                    .rateLimited(10, 1, TimeUnit.MINUTES)
-                    .build()
-            install(ContentNegotiation) {
-                gson {
-                    setPrettyPrinting()
-                }
+fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
+    val env = getEnvironment()
+    val authorizedUsers = listOf(env.syfosoknadId)
+    val applicationState = ApplicationState()
+    embeddedServer(Netty, env.applicationPort) {
+        val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
+                .cached(10, 24, TimeUnit.HOURS)
+                .rateLimited(10, 1, TimeUnit.MINUTES)
+                .build()
+        install(ContentNegotiation) {
+            gson {
+                setPrettyPrinting()
             }
-            install(Authentication) {
-                jwt {
-                    verifier(jwkProvider, env.jwtIssuer)
-                    realm = "Syfonarmesteleder"
-                    validate { credentials ->
-                        val appid: String = credentials.payload.getClaim("appid").asString()
-                        log.info("authorization attempt for $appid")
-                        if (appid in authorizedUsers && credentials.payload.audience.contains(env.clientid)) {
-                            log.info("authorization ok")
-                            return@validate JWTPrincipal(credentials.payload)
-                        }
-                        log.info("authorization failed")
-                        return@validate null
-                    }
-                }
-            }
-            initRouting(applicationState, env)
-        }.start(wait = false)
-
-        try {
-            val listeners = (1..env.applicationThreads).map {
-                launch {
-                    blockingApplicationLogic(applicationState)
-                }
-            }.toList()
-
-            runBlocking {
-                Runtime.getRuntime().addShutdownHook(Thread {
-                    applicationServer.stop(10, 10, TimeUnit.SECONDS)
-                })
-
-                applicationState.initialized = true
-                listeners.forEach { it.join() }
-            }
-        } finally {
-            applicationState.running = false
         }
-    }
-}
+        install(Authentication) {
+            jwt {
+                verifier(jwkProvider, env.jwtIssuer)
+                realm = "Syfonarmesteleder"
+                validate { credentials ->
+                    val appid: String = credentials.payload.getClaim("appid").asString()
+                    log.info("authorization attempt for $appid")
+                    if (appid in authorizedUsers && credentials.payload.audience.contains(env.clientid)) {
+                        log.info("authorization ok")
+                        return@validate JWTPrincipal(credentials.payload)
+                    }
+                    log.info("authorization failed")
+                    return@validate null
+                }
+            }
+        }
+        initRouting(applicationState, env)
+    }.start(wait = false)
 
-suspend fun blockingApplicationLogic(applicationState: ApplicationState) {
-    while (applicationState.running) {
-        delay(100)
-    }
+    Runtime.getRuntime().addShutdownHook(Thread {
+        coroutineContext.cancelChildren()
+    })
 }
 
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
