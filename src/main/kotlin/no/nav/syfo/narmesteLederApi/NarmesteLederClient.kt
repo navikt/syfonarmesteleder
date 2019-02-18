@@ -4,11 +4,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
-import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import no.nav.syfo.AccessTokenClient
 import org.slf4j.MDC
-import java.time.LocalDate
 
 class NarmesteLederClient(
         private val endpointUrl: String,
@@ -16,9 +14,9 @@ class NarmesteLederClient(
         private val accessTokenClient: AccessTokenClient,
         private val client: HttpClient
 ) {
-    suspend fun hentNarmesteLederFraSyfoserviceStrangler(hrAktorId: String): List<NarmesteLeder> {
+    suspend fun hentNarmesteLederFraSyfoserviceStrangler(nlAktorId: String): List<NarmesteLederRelasjon> {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get("$endpointUrl/api/$hrAktorId/narmesteleder") {
+        return client.get("$endpointUrl/api/$nlAktorId/narmesteleder") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
@@ -29,12 +27,3 @@ class NarmesteLederClient(
     }
 }
 
-data class NarmesteLeder(
-        val aktorId: String,
-        val orgnummer: String,
-        val nlAktorId: String,
-        val nlTelefonnummer: String?,
-        val nlEpost: String?,
-        val aktivFom: LocalDate,
-        val agForskutterer: Boolean?
-)

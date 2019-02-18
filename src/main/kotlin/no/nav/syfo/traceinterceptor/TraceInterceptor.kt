@@ -11,7 +11,7 @@ import java.util.*
 suspend fun <T : Any> PipelineContext<T, ApplicationCall>.withTraceInterceptor(body: PipelineInterceptor<T, ApplicationCall>) {
     try {
         MDC.put("Nav-Callid", call.request.header("Nav-Callid") ?: UUID.randomUUID().toString())
-        MDC.put("Nav-Consumer-Id", call.request.header("Nav-Consumer-Id") ?: "syfohrtilgang")
+        MDC.put("Nav-Consumer-Id", call.request.header("Nav-Consumer-Id") ?: "syfonarmesteleder")
 
         body(subject)
     } finally {

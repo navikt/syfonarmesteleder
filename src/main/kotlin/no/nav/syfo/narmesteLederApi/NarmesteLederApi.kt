@@ -13,23 +13,23 @@ import org.slf4j.LoggerFactory
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
-    get("/syfonarmesteleder/{hrAktorId}/hrtilganger") {
+    get("/syfonarmesteleder/{arbeidsgiverAktorId}/tilganger") {
         withTraceInterceptor {
             try {
-                val hrAktorId: String = call.parameters["hrAktorId"]?.takeIf { it.isNotEmpty() }
-                        ?: throw IllegalArgumentException("HrAktorId mangler")
+                val arbeidsgiverAktorId: String = call.parameters["arbeidsgiverAktorId"]?.takeIf { it.isNotEmpty() }
+                        ?: throw IllegalArgumentException("ArbeidsgiverAktorId mangler")
 
-                log.info("Mottatt forespørsel om nærmeste leder-barn for aktør {}", hrAktorId)
+                log.info("Mottatt forespørsel om nærmeste leder-barn for aktør {}", arbeidsgiverAktorId)
 
-                val narmesteLeder = narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(hrAktorId)
-                        .map { narmesteLeder ->
-                            Entitet(
-                                    aktor = narmesteLeder.aktorId,
-                                    orgnummer = narmesteLeder.orgnummer,
+                val narmesteLeder = narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(arbeidsgiverAktorId)
+                        .map { narmesteLederRelasjon ->
+                            NarmesteLederTilgang(
+                                    aktor = narmesteLederRelasjon.aktorId,
+                                    orgnummer = narmesteLederRelasjon.orgnummer,
                                     tilganger = listOf(SYKMELDING, SYKEPENGESOKNAD, MOTE, OPPFOLGINGSPLAN))
                         }
 
-                call.respond(TilgangRespons(narmesteLeder, emptyList()))
+                call.respond(narmesteLeder)
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente forskuttering: {}", e.message)
@@ -39,13 +39,8 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
     }
 }
 
-data class TilgangRespons(
-        val narmesteLeder: List<Entitet> = emptyList(),
-        val humanResources: List<Entitet> = emptyList()
-)
-
-data class Entitet(
-        val aktor: String? = null,
+data class NarmesteLederTilgang(
+        val aktor: String,
         val orgnummer: String,
         val tilganger: List<Tilgang>
 )
