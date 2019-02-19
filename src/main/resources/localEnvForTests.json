@@ -1,7 +1,7 @@
 {
-    "applicationPort": "8080",
+    "applicationPort": "8081",
     "applicationThreads": "4",
-    "servicestranglerUrl": "http://localhost",
+    "servicestranglerUrl": "http://localhost:8086",
     "servicestranglerId": "8888888",
     "aadAccessTokenUrl": "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token",
     "aadDiscoveryUrl": "https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration",
