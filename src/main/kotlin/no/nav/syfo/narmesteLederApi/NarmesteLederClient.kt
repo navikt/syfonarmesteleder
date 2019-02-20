@@ -17,7 +17,7 @@ class NarmesteLederClient(
 ) {
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(nlAktorId: String): List<NarmesteLederRelasjon> {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get<List<NarmesteLeder>>("$endpointUrl/api/$nlAktorId/narmesteleder") {
+        return client.get<List<NarmesteLeder>>("$endpointUrl/api/arbeidsgiver/$nlAktorId/narmesteleder") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
@@ -35,6 +35,18 @@ class NarmesteLederClient(
                     narmesteLederForskutterer = it.agForskutterer,
                     skrivetilgang = true,
                     tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN))
+        }
+    }
+
+    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon {
+        val accessToken = accessTokenClient.hentAccessToken(resourceId)
+        return client.get("$endpointUrl/api/sykmeldt/$sykmeldtAktorId/$orgnummer/narmesteleder") {
+            accept(ContentType.Application.Json)
+            headers {
+                append("Authorization", "Bearer $accessToken")
+                append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
+                append("Nav-Callid", MDC.get("Nav-Callid"))
+            }
         }
     }
 }
