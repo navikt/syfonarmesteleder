@@ -5,9 +5,18 @@ import java.time.LocalDate
 data class NarmesteLederRelasjon(
         val aktorId: String,
         val orgnummer: String,
-        val nlAktorId: String,
-        val nlTelefonnummer: String?,
-        val nlEpost: String?,
+        val narmesteLederAktorId: String,
+        val narmesteLederTelefonnummer: String?,
+        val narmesteLederEpost: String?,
         val aktivFom: LocalDate,
-        val agForskutterer: Boolean?
+        val narmesteLederForskutterer: Boolean?,
+        val skrivetilgang: Boolean,
+        val tilganger: List<Tilgang>
 )
+
+enum class Tilgang {
+    SYKMELDING,
+    SYKEPENGESOKNAD,
+    MOTE,
+    OPPFOLGINGSPLAN
+}
