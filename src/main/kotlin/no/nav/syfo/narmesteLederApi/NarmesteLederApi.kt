@@ -8,7 +8,6 @@ import io.ktor.routing.get
 import no.nav.syfo.traceinterceptor.withTraceInterceptor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
@@ -21,9 +20,7 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
 
                 log.info("Mottatt forespørsel om nærmeste leder-relasjoner for leder {}", narmesteLederAktorId)
 
-                val narmesteLeder = narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(narmesteLederAktorId)
-
-                call.respond(narmesteLeder)
+                call.respond(narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(narmesteLederAktorId))
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder: {}", e.message)
@@ -40,18 +37,8 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
                 val orgnummer: String = call.parameters["orgnummer"]?.takeIf { it.isNotEmpty() }
                         ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
 
-                val narmesteLeder = narmesteLederClient
-                        .hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer)
-
-                call.respond(listOf(NarmesteLederRelasjon(
-                        sykmeldtAktorId,
-                        orgnummer,
-                        narmesteLeder.nlAktorId,
-                        narmesteLeder.nlTelefonnummer,
-                        narmesteLeder.nlEpost,
-                        LocalDate.now(),
-                        narmesteLeder.agForskutterer
-                )))
+                call.respond(narmesteLederClient
+                        .hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer))
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder da aktørid mangler: {}", e.message)
