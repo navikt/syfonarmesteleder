@@ -40,7 +40,7 @@ class NarmesteLederClient(
 
     suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get<NarmesteLeder>("$endpointUrl/api/sykmeldt/$sykmeldtAktorId/$orgnummer/narmesteleder") {
+        return client.get<NarmesteLeder>("$endpointUrl/api/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")

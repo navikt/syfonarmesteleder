@@ -29,12 +29,12 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
         }
     }
 
-    get("/syfonarmesteleder/sykmeldt/{sykmeldtAktorId}/{orgnummer}") {
+    get("/syfonarmesteleder/sykmeldt/{sykmeldtAktorId}") {
         withTraceInterceptor {
             try {
                 val sykmeldtAktorId: String = call.parameters["sykmeldtAktorId"]?.takeIf { it.isNotEmpty() }
                         ?: throw IllegalArgumentException("sykmeldtAktorId mangler")
-                val orgnummer: String = call.parameters["orgnummer"]?.takeIf { it.isNotEmpty() }
+                val orgnummer: String = call.request.queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
                         ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
 
                 call.respond(narmesteLederClient
