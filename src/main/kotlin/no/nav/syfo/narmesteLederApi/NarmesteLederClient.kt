@@ -17,7 +17,7 @@ class NarmesteLederClient(
 ) {
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(nlAktorId: String): List<NarmesteLederRelasjon> {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get<List<NarmesteLeder>>("$endpointUrl/api/arbeidsgiver/$nlAktorId/narmesteleder") {
+        return client.get<List<NarmesteLeder>>("$endpointUrl/arbeidsgiver/$nlAktorId/narmesteleder") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
@@ -40,7 +40,7 @@ class NarmesteLederClient(
 
     suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get<NarmesteLeder>("$endpointUrl/api/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
+        return client.get<NarmesteLeder>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
