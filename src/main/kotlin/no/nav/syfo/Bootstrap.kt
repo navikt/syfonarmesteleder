@@ -2,6 +2,8 @@ package no.nav.syfo
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.google.gson.JsonDeserializer
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializer
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.net.URL
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -53,6 +56,9 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
         install(ContentNegotiation) {
             gson {
                 setPrettyPrinting()
+                registerTypeAdapter(LocalDate::class.java, JsonSerializer<LocalDate> { src, _, _ ->
+                    src?.let { JsonPrimitive(it.format(DateTimeFormatter.ISO_LOCAL_DATE)) }
+                })
             }
         }
         install(Authentication) {
@@ -77,6 +83,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     Runtime.getRuntime().addShutdownHook(Thread {
         coroutineContext.cancelChildren()
     })
+
+    applicationState.initialized = true
 }
 
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
@@ -86,7 +94,7 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
                 registerTypeAdapter(
                         LocalDate::class.java,
                         JsonDeserializer<LocalDate> { json, _, _ ->
-                            LocalDate.parse(json.asString)
+                            json?.asString?.let { LocalDate.parse(it) }
                         })
             }
         }
