@@ -83,6 +83,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     Runtime.getRuntime().addShutdownHook(Thread {
         coroutineContext.cancelChildren()
     })
+
+    applicationState.initialized = true
 }
 
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
