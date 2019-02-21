@@ -8,6 +8,7 @@
     "jwkKeysUrl": "https://login.microsoftonline.com/common/discovery/keys",
     "jwtIssuer": "https://sts.windows.net/XXXXXXXX/",
     "syfosoknadId": "555555",
+    "syfovarselId": "666666",
     "clientid": "999999",
     "credentials": {
       "clientsecret": "12345"
