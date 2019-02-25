@@ -15,9 +15,9 @@ class ForskutteringsClient(
         private val accessTokenClient: AccessTokenClient,
         private val client: HttpClient
 ) {
-    suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktorId: String, orgnummer: String): ForskutteringRespons {
+    suspend fun hentForskutteringFraSyfoserviceStrangler(aktorId: String, orgnummer: String): ForskutteringRespons? {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get("$endpointUrl/api/$aktorId/forskuttering") {
+        return client.get<ForskutteringRespons?>("$endpointUrl/api/$aktorId/forskuttering") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
@@ -25,6 +25,10 @@ class ForskutteringsClient(
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }
             parameter("orgnummer", orgnummer)
+        }.also {
+            if (it == null) {
+                log.warn("Kunne ikke hente forskuttering for aktorId {} i organisasjon {}", aktorId, orgnummer)
+            }
         }
     }
 }

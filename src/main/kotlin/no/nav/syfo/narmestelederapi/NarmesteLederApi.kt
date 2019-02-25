@@ -1,4 +1,4 @@
-package no.nav.syfo.narmesteLederApi
+package no.nav.syfo.narmestelederapi
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -38,7 +38,7 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
                         ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
 
                 call.respond(narmesteLederClient
-                        .hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer))
+                        .hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer)!!)
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder da aktørid mangler: {}", e.message)

@@ -25,8 +25,8 @@ fun Route.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient) 
 
                 log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorId, orgnummer)
 
-                val arbeidsgiverForskutterer = forskutteringsClient.hentNarmesteLederFraSyfoserviceStrangler(aktorId, orgnummer)
-                call.respond(arbeidsgiverForskutterer)
+                val arbeidsgiverForskutterer = forskutteringsClient.hentForskutteringFraSyfoserviceStrangler(aktorId, orgnummer)
+                call.respond(arbeidsgiverForskutterer!!)
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente forskuttering: {}", e.message)

@@ -29,8 +29,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
-import no.nav.syfo.narmesteLederApi.NarmesteLederClient
-import no.nav.syfo.narmesteLederApi.registrerNarmesteLederApi
+import no.nav.syfo.narmestelederapi.NarmesteLederClient
+import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector

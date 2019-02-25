@@ -1,4 +1,4 @@
-package no.nav.syfo.narmesteLederApi
+package no.nav.syfo.narmestelederapi
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -38,16 +38,20 @@ class NarmesteLederClient(
         }
     }
 
-    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon {
+    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon? {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get<NarmesteLeder>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
+        return client.get<NarmesteLeder?>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
                 append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }
-        }.let {
+        }.also {
+            if (it == null) {
+                log.warn("Kunne ikke hente nærmeste leder for sykmeldt {} i organisasjon {}", sykmeldtAktorId, orgnummer)
+            }
+        }?.let {
             NarmesteLederRelasjon(
                     aktorId = it.aktorId,
                     orgnummer = it.orgnummer,
