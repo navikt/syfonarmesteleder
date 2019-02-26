@@ -4,7 +4,6 @@ import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
-import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import io.ktor.client.HttpClient
@@ -33,8 +32,10 @@ import java.net.ProxySelector
 import java.net.URL
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import no.nav.syfo.db.*
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
+
 private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
@@ -65,6 +66,10 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
                     log.info("authorization failed")
                     return@validate null
                 }
+/*                skipWhen { call ->
+                    call.request.uri.contains("arbeidsgiverForskutterer")
+                }*/
+
             }
         }
         initRouting(applicationState, env)
@@ -113,6 +118,7 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
     }
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClient)
     val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+    val nldb=NlDb()
     routing {
         registerNaisApi(
                 readynessCheck = {
@@ -122,8 +128,9 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
                     applicationState.running
                 }
         )
-        authenticate {
-            registrerForskutteringApi(forskutteringsClient)
-        }
+        // authenticate {
+        registrerForskutteringApi(forskutteringsClient)
+        // }
+        registrerNarmesteLederSok(nldb)
     }
 }
