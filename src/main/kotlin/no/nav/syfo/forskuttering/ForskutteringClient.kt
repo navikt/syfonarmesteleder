@@ -15,7 +15,7 @@ class ForskutteringsClient(
         private val accessTokenClient: AccessTokenClient,
         private val client: HttpClient
 ) {
-    suspend fun hentNarmesteLederFraSyfoserviceStrangler(aktorId: String, orgnummer: String): ForskutteringRespons {
+    suspend fun hentForskutteringFraSyfoserviceStrangler(aktorId: String, orgnummer: String): ForskutteringRespons {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
         return client.get("$endpointUrl/api/$aktorId/forskuttering") {
             accept(ContentType.Application.Json)

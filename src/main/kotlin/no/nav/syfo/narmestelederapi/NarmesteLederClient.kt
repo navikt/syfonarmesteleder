@@ -1,4 +1,4 @@
-package no.nav.syfo.narmesteLederApi
+package no.nav.syfo.narmestelederapi
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -38,9 +38,9 @@ class NarmesteLederClient(
         }
     }
 
-    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon {
+    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon? {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        return client.get<NarmesteLeder>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
+        return client.get<NarmesteLederResponse>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
@@ -48,6 +48,8 @@ class NarmesteLederClient(
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }
         }.let {
+            it.narmesteLeder
+        }?.let {
             NarmesteLederRelasjon(
                     aktorId = it.aktorId,
                     orgnummer = it.orgnummer,
@@ -61,6 +63,8 @@ class NarmesteLederClient(
         }
     }
 }
+
+data class NarmesteLederResponse(val narmesteLeder: NarmesteLeder?)
 
 data class NarmesteLeder(
         val aktorId: String,
