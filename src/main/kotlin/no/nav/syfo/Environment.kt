@@ -15,11 +15,13 @@ fun getEnvironment(): Environment {
                 getEnvVar("APPLICATION_THREADS", "4").toInt(),
                 getEnvVar("SERVICESTRANGLER_URL"),
                 getEnvVar("SERVICESTRANGLER_ID"),
+                getEnvVar("ARBEIDSGIVERTILGANG_ID"),
                 getEnvVar("AADACCESSTOKEN_URL"),
                 getEnvVar("AADDISCOVERY_URL"),
                 getEnvVar("JWKKEYS_URL", "https://login.microsoftonline.com/common/discovery/keys"),
                 getEnvVar("JWT_ISSUER"),
                 getEnvVar("SYFOSOKNAD_ID"),
+                getEnvVar("SYFOVARSEL_ID"),
                 getEnvVar("CLIENT_ID"),
                 Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
         )
@@ -33,11 +35,13 @@ data class Environment(
         val applicationThreads: Int,
         val servicestranglerUrl: String,
         val servicestranglerId: String,
+        val arbeidsgivertilgangId: String,
         val aadAccessTokenUrl: String,
         val aadDiscoveryUrl: String,
         val jwkKeysUrl: String,
         val jwtIssuer: String,
         val syfosoknadId: String,
+        val syfovarselId: String,
         val clientid: String,
         val credentials: VaultCredentials
 )
