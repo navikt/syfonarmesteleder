@@ -1,4 +1,4 @@
-package no.nav.syfo.narmesteLederApi
+package no.nav.syfo.narmestelederapi
 
 import java.time.LocalDate
 

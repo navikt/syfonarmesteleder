@@ -1,4 +1,4 @@
-package no.nav.syfo.narmesteLederApi
+package no.nav.syfo.narmestelederapi
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept

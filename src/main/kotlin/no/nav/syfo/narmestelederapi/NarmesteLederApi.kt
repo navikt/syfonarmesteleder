@@ -1,4 +1,4 @@
-package no.nav.syfo.narmesteLederApi
+package no.nav.syfo.narmestelederapi
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode

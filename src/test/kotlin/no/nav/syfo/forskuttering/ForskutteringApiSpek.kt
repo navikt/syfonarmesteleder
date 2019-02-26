@@ -21,7 +21,6 @@ import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.getEnvironment
 import no.nav.syfo.initRouting
-import no.nav.syfo.narmesteLederApi.NarmesteLederClient
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldMatch
 import org.amshove.kluent.shouldNotEqual
