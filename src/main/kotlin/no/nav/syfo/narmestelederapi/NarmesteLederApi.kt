@@ -37,9 +37,8 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
                 val orgnummer: String = call.request.queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
                         ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
 
-                call.respond(narmesteLederClient
-                        .hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer))
-
+                val narmesteLederRelasjon = narmesteLederClient.hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer)
+                call.respond(mapOf("narmesteLederRelasjon" to narmesteLederRelasjon))
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder da aktørid mangler: {}", e.message)
                 call.respond(HttpStatusCode.BadRequest, e.message!!)
