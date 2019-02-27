@@ -50,7 +50,7 @@ class NarmesteLederClient(
                 append("Nav-Callid", MDC.get("Nav-Callid") ?: missingCallId("hentNarmesteLederForSykmeldtFraSyfoserviceStrangler"))
             }
         }.let {
-            it.narmesteLeder
+            it.narmesteleder
         }?.let {
             NarmesteLederRelasjon(
                     aktorId = it.aktorId,
@@ -66,7 +66,7 @@ class NarmesteLederClient(
     }
 }
 
-data class NarmesteLederResponse(val narmesteLeder: NarmesteLeder?)
+data class NarmesteLederResponse(val narmesteleder: NarmesteLeder?)
 
 data class NarmesteLeder(
         val aktorId: String,
