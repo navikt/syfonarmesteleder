@@ -23,7 +23,10 @@ fun getEnvironment(): Environment {
                 getEnvVar("SYFOSOKNAD_ID"),
                 getEnvVar("SYFOVARSEL_ID"),
                 getEnvVar("CLIENT_ID"),
-                Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
+                Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java),
+                getEnvVar("DBCONNSTR","jdbc:h2:mem:nltest;DB_CLOSE_DELAY=-1"),
+                getEnvVar("DBUSER","user"),
+                getEnvVar("DBPASS","pass")
         )
     }
 }
@@ -43,7 +46,10 @@ data class Environment(
         val syfosoknadId: String,
         val syfovarselId: String,
         val clientid: String,
-        val credentials: VaultCredentials
+        val credentials: VaultCredentials,
+        val dbConnString: String,
+        val dbUser: String,
+        val dbPass: String
 )
 
 data class VaultCredentials(

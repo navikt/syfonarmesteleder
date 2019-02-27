@@ -28,7 +28,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.db.NlDb
-import no.nav.syfo.db.registrerNarmesteLederSok
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
@@ -113,7 +112,7 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClient)
     val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
     val nldb=NlDb()
-    val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+    val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient,nldb)
 
     routing {
         registerNaisApi(
@@ -124,10 +123,9 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
                     applicationState.running
                 }
         )
-        authenticate {
+        //authenticate {
             registrerForskutteringApi(forskutteringsClient)
             registrerNarmesteLederApi(narmesteLederClient)
-        }
-        registrerNarmesteLederSok(nldb)
+        //}
     }
 }

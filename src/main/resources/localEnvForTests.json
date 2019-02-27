@@ -13,5 +13,8 @@
     "clientid": "999999",
     "credentials": {
       "clientsecret": "12345"
-    }
+    },
+    "dbConnString": "jdbc:h2:mem:nltest;DB_CLOSE_DELAY=-1",
+    "dbUser": "user",
+    "dbPass": "pass"
 }
