@@ -24,9 +24,9 @@ fun getEnvironment(): Environment {
                 getEnvVar("SYFOVARSEL_ID"),
                 getEnvVar("CLIENT_ID"),
                 Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java),
-                getEnvVar("DBCONNSTR","jdbc:h2:mem:nltest;DB_CLOSE_DELAY=-1"),
-                getEnvVar("DBUSER","user"),
-                getEnvVar("DBPASS","pass")
+                getEnvVar("DBCONNSTR"),
+                getEnvVar("DBUSER"),
+                getEnvVar("DBPASS")
         )
     }
 }

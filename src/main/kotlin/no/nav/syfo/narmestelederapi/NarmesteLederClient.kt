@@ -1,16 +1,12 @@
 package no.nav.syfo.narmestelederapi
 
-import com.google.gson.GsonBuilder
-import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
 import no.nav.syfo.AccessTokenClient
-import no.nav.syfo.db.NlDb
+import no.nav.syfo.db.NarmesteLederDAO
 import no.nav.syfo.missingCallId
 import no.nav.syfo.missingConsumerId
 import org.slf4j.MDC
@@ -20,8 +16,7 @@ class NarmesteLederClient(
         private val endpointUrl: String,
         private val resourceId: String,
         private val accessTokenClient: AccessTokenClient,
-        private val client: HttpClient,
-        private val nldb: NlDb
+        private val client: HttpClient
 ) {
 
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(nlAktorId: String): List<NarmesteLederRelasjon> {
@@ -62,38 +57,6 @@ class NarmesteLederClient(
         }.let {
             it.narmesteLeder
         }?.let {
-            NarmesteLederRelasjon(
-                    aktorId = it.aktorId,
-                    orgnummer = it.orgnummer,
-                    narmesteLederAktorId = it.nlAktorId,
-                    narmesteLederTelefonnummer = it.nlTelefonnummer,
-                    narmesteLederEpost = it.nlEpost,
-                    aktivFom = it.aktivFom,
-                    arbeidsgiverForskutterer = it.agForskutterer,
-                    skrivetilgang = true,
-                    tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN))
-        }
-    }
-
-    fun hentNarmesteLederFraDb(nlAktorId: String): List<NarmesteLederRelasjon> {
-        val aktorer = nldb.finnLederAktorer(nlAktorId)
-        return aktorer.map {
-            NarmesteLederRelasjon(
-                    aktorId = it.aktorId,
-                    orgnummer = it.orgnummer,
-                    narmesteLederAktorId = it.nlAktorId,
-                    narmesteLederTelefonnummer = it.nlTelefonnummer,
-                    narmesteLederEpost = it.nlEpost,
-                    aktivFom = it.aktivFom,
-                    arbeidsgiverForskutterer = it.agForskutterer,
-                    skrivetilgang = true,
-                    tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN))
-        }
-    }
-
-    fun hentNarmesteLederForSykmeldtFraDb(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon? {
-        val nlAktor = nldb.finnAktorLeder(sykmeldtAktorId,orgnummer)
-        return nlAktor?.let{
             NarmesteLederRelasjon(
                     aktorId = it.aktorId,
                     orgnummer = it.orgnummer,

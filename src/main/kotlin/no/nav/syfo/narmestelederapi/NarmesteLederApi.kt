@@ -5,13 +5,14 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
+import no.nav.syfo.db.NarmesteLederDAO
 import no.nav.syfo.traceinterceptor.withTraceInterceptor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
-fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
+fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient, narmesteLederDao: NarmesteLederDAO) {
     get("/syfonarmesteleder/narmesteLeder/{narmesteLederAktorId}") {
         withTraceInterceptor {
             try {
@@ -20,7 +21,11 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
 
                 log.info("Mottatt forespørsel om nærmeste leder-relasjoner for leder {}", narmesteLederAktorId)
 
-                call.respond(narmesteLederClient.hentNarmesteLederFraDb(narmesteLederAktorId))
+                var responsebody = narmesteLederDao.finnLederAktorer(narmesteLederAktorId)
+                if (responsebody.isEmpty()) {
+                    responsebody = narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(narmesteLederAktorId)
+                }
+                call.respond(responsebody)
 
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder: {}", e.message)
@@ -37,9 +42,10 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
                 val orgnummer: String = call.request.queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
                         ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
 
-                log.info("Mottatt forespørsel om nærmeste leder-relasjoner for sykmeldt {}, orgnummer {}", sykmeldtAktorId,orgnummer)
+                log.info("Mottatt forespørsel om nærmeste leder-relasjoner for sykmeldt {}, orgnummer {}", sykmeldtAktorId, orgnummer)
 
-                val narmesteLederRelasjon = narmesteLederClient.hentNarmesteLederForSykmeldtFraDb(sykmeldtAktorId, orgnummer)
+                val narmesteLederRelasjon = narmesteLederDao.finnAktorLeder(sykmeldtAktorId, orgnummer)
+                        ?: narmesteLederClient.hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer)
                 call.respond(mapOf("narmesteLederRelasjon" to narmesteLederRelasjon))
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder da aktørid mangler: {}", e.message)

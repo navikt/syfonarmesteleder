@@ -1,12 +1,12 @@
 create table narmesteleder
 (
-  aktorid         varchar(11)  not null,
-  orgnummer       varchar(9)   not null,
-  nlaktorid       varchar(11)  not null,
+  aktorid         varchar(16)  not null,
+  orgnummer       varchar(16)   not null,
+  nlaktorid       varchar(16)  not null,
   aktivfom        date         not null,
-  nltelefonnummer varchar(20)  not null default '',
-  nlepost         varchar(128) not null default '',
-  agforskutterer  bool         not null default false,
-  primary key (aktorid, orgnummer)
+  nltelefonnummer varchar(32)  not null,
+  nlepost         varchar(128) not null,
+  agforskutterer  number(1),
+  primary key (aktorid, orgnummer, nlaktorid)
 );
 

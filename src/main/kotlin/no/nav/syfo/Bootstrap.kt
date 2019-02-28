@@ -26,13 +26,16 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
+import kotliquery.HikariCP
+import kotliquery.sessionOf
 import no.nav.syfo.api.registerNaisApi
-import no.nav.syfo.db.NlDb
+import no.nav.syfo.db.NarmesteLederDAO
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.net.URL
@@ -109,10 +112,20 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
             }
         }
     }
+    val dbconnstr = env.dbConnString
+    val dbuser = env.dbUser
+    val dbpass = env.dbPass
+
+    Flyway.configure().run {
+        dataSource(dbconnstr, dbuser, dbpass)
+        load().migrate()
+    }
+    HikariCP.default(dbconnstr, dbuser, dbpass)
+    val session = sessionOf(HikariCP.dataSource())
+
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClient)
     val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
-    val nldb=NlDb()
-    val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient,nldb)
+    val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
 
     routing {
         registerNaisApi(
@@ -123,9 +136,9 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
                     applicationState.running
                 }
         )
-        //authenticate {
+        authenticate {
             registrerForskutteringApi(forskutteringsClient)
-            registrerNarmesteLederApi(narmesteLederClient)
-        //}
+            registrerNarmesteLederApi(narmesteLederClient, NarmesteLederDAO(session))
+        }
     }
 }
