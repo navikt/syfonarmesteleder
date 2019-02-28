@@ -13,7 +13,7 @@ fun getEnvironment(): Environment {
         Environment(
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
                 getEnvVar("APPLICATION_THREADS", "4").toInt(),
-                getEnvVar("SERVICESTRANGLER_URL"),
+                getEnvVar("SERVICESTRANGLER_URL", "http://syfoservicestrangler"),
                 getEnvVar("SERVICESTRANGLER_ID"),
                 getEnvVar("ARBEIDSGIVERTILGANG_ID"),
                 getEnvVar("AADACCESSTOKEN_URL"),
