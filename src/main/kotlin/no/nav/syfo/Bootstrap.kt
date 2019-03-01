@@ -11,7 +11,9 @@ import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache.ApacheEngineConfig
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.logging.DEFAULT
@@ -88,7 +90,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 }
 
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
-    val httpClient = HttpClient(Apache) {
+    val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
             serializer = GsonSerializer {
                 registerTypeAdapter(
@@ -102,13 +104,20 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
             logger = Logger.DEFAULT
             level = LogLevel.INFO
         }
+    }
+    val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
+        config()
         engine {
             customizeClient {
                 setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
             }
         }
     }
-    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClient)
+
+    val httpClientWithProxy = HttpClient(Apache, proxyConfig)
+    val httpClient = HttpClient(Apache, config)
+
+    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClientWithProxy)
     val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
     val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
 
