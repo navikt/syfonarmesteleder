@@ -4,11 +4,14 @@ import com.google.gson.Gson
 import java.io.File
 
 const val vaultApplicationPropertiesPath = "/var/run/secrets/nais.io/vault/secrets.json"
-const val localEnvironmentPropertiesPath = "./src/main/resources/localEnvForTests.json"
+const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
+const val defaultlocalEnvironmentPropertiesPath = "./src/main/resources/localEnvForTests.json"
 
 fun getEnvironment(): Environment {
     return if (appIsRunningLocally) {
-        Gson().fromJson(readFileDirectlyAsText(localEnvironmentPropertiesPath), Environment::class.java)
+        Gson().fromJson(
+                firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath).readText(),
+                Environment::class.java)
     } else {
         Environment(
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -23,7 +26,7 @@ fun getEnvironment(): Environment {
                 getEnvVar("SYFOSOKNAD_ID"),
                 getEnvVar("SYFOVARSEL_ID"),
                 getEnvVar("CLIENT_ID"),
-                Gson().fromJson(readFileDirectlyAsText(vaultApplicationPropertiesPath), VaultCredentials::class.java)
+                Gson().fromJson(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
         )
     }
 }
@@ -53,4 +56,6 @@ data class VaultCredentials(
 fun getEnvVar(varName: String, defaultValue: String? = null) =
         System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
-fun readFileDirectlyAsText(fileName: String): String = File(fileName).readText(Charsets.UTF_8)
+private fun firstExistingFile(vararg paths: String) = paths
+        .map(::File)
+        .first(File::exists)
