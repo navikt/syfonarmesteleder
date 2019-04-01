@@ -1,9 +1,11 @@
 package no.nav.syfo
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.receive
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.post
+import io.ktor.client.response.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
@@ -20,7 +22,8 @@ class AccessTokenClient(
 
     suspend fun hentAccessToken(resource: String): String {
         log.trace("Henter token fra Azure AD")
-        val response: AadAccessToken = client.post(aadAccessTokenUrl) {
+        // TODO: Remove this workaround whenever ktor issue #1009 is fixed
+        val response: AadAccessToken = client.post<HttpResponse>(aadAccessTokenUrl) {
             accept(ContentType.Application.Json)
             method = HttpMethod.Post
             body = FormDataContent(Parameters.build {
@@ -29,7 +32,7 @@ class AccessTokenClient(
                 append("grant_type", "client_credentials")
                 append("client_secret", clientSecret)
             })
-        }
+        }.use { it.call.response.receive<AadAccessToken>() }
         log.trace("Har hentet accesstoken")
         return response.access_token
     }
