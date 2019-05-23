@@ -4,9 +4,8 @@ import io.ktor.application.install
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.MockHttpResponse
+import io.ktor.client.engine.mock.respond
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
@@ -16,6 +15,7 @@ import io.ktor.request.uri
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
+import io.ktor.util.InternalAPI
 import kotlinx.coroutines.io.ByteReadChannel
 import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.ApplicationState
@@ -31,6 +31,7 @@ const val aktorIdMedForskuttering = 123
 const val aktorIdUtenForskuttering = 999
 const val aktorIdMedUkjentForskuttering = 678
 
+@InternalAPI
 object ForskutteringApiSpek : Spek({
     val applicationState = ApplicationState()
     val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
@@ -91,52 +92,37 @@ object ForskutteringApiSpek : Spek({
     }
 })
 
-val httpMockEngine: HttpClientEngine = MockEngine {
-    when (this.url.fullUrl) {
-        "https://tjenester.nav.no/api/$aktorIdMedForskuttering/forskuttering?orgnummer=333" -> {
-            MockHttpResponse(
-                    call,
-                    HttpStatusCode.OK,
-                    ByteReadChannel("{\"forskuttering\":\"JA\"}".toByteArray(Charsets.UTF_8)),
-                    headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-            )
-        }
-        "https://tjenester.nav.no/api/$aktorIdUtenForskuttering/forskuttering?orgnummer=333" -> {
-            MockHttpResponse(
-                    call,
-                    HttpStatusCode.OK,
-                    ByteReadChannel("{\"forskuttering\":\"NEI\"}".toByteArray(Charsets.UTF_8)),
-                    headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-            )
-        }
-        "https://tjenester.nav.no/api/$aktorIdMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
-            MockHttpResponse(
-                    call,
-                    HttpStatusCode.OK,
-                    ByteReadChannel("{\"forskuttering\":\"UKJENT\"}".toByteArray(Charsets.UTF_8)),
-                    headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-            )
-        }
-        "https://login.microsoftonline.com/token" -> {
-            MockHttpResponse(
-                    call,
-                    HttpStatusCode.OK,
-                    ByteReadChannel("{\"access_token\":\"xyz1234\"}".toByteArray(Charsets.UTF_8)),
-                    headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-            )
-        }
-        else -> {
-            error("Unhandled ${url.fullUrl}")
+@InternalAPI
+val client = HttpClient(MockEngine) {
+    engine {
+        addHandler { request ->
+            when (request.url.fullUrl) {
+                "https://tjenester.nav.no/api/$aktorIdMedForskuttering/forskuttering?orgnummer=333" -> {
+                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(ByteReadChannel("{\"forskuttering\":\"JA\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                }
+                    "https://tjenester.nav.no/api/$aktorIdUtenForskuttering/forskuttering?orgnummer=333" -> {
+                        val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(ByteReadChannel("{\"forskuttering\":\"NEI\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                }
+                "https://tjenester.nav.no/api/$aktorIdMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
+                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(ByteReadChannel("{\"forskuttering\":\"UKJENT\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                }
+                "https://login.microsoftonline.com/token" -> {
+                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                }
+                else -> error("Unhandled ${request.url.fullUrl}")
+            }
         }
     }
-}
-
-val client = HttpClient(httpMockEngine) {
     install(JsonFeature) {
         serializer = GsonSerializer()
     }
 }
 
+@InternalAPI
 val accessTokenClient = AccessTokenClient("https://login.microsoftonline.com/token", "clientid", "clientsecret", client)
 
 private val Url.hostWithPortIfRequired: String get() = if (port == protocol.defaultPort) host else hostWithPort
