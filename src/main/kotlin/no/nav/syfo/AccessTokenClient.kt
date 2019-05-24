@@ -1,5 +1,6 @@
 package no.nav.syfo
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
@@ -9,6 +10,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 class AccessTokenClient(
         private val aadAccessTokenUrl: String,
@@ -31,16 +33,13 @@ class AccessTokenClient(
             })
         }
         log.trace("Har hentet accesstoken")
+        System.out.println("Token med timestamp: " + response.expires_on)
         return response.access_token
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 private data class AadAccessToken(
         val access_token: String,
-        val token_type: String,
-        val expires_in: String,
-        val ext_expires_in: String,
-        val expires_on: String,
-        val not_before: String,
-        val resource: String
+        val expires_on: Instant
 )

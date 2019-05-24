@@ -29,7 +29,7 @@ class ForskutteringsClient(
     }
 }
 
-class ForskutteringRespons(private val forskuttering: Forskuttering)
+class ForskutteringRespons(val forskuttering: Forskuttering)
 
 enum class Forskuttering {
     JA, NEI, UKJENT

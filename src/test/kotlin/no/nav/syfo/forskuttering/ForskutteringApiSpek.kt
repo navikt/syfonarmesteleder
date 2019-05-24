@@ -1,16 +1,19 @@
 package no.nav.syfo.forskuttering
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.application.install
 import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.GsonSerializer
+import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
-import io.ktor.gson.gson
 import io.ktor.http.*
+import io.ktor.jackson.jackson
 import io.ktor.request.uri
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
@@ -22,7 +25,6 @@ import no.nav.syfo.ApplicationState
 import no.nav.syfo.getEnvironment
 import no.nav.syfo.initRouting
 import org.amshove.kluent.shouldEqual
-import org.amshove.kluent.shouldMatch
 import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -44,23 +46,24 @@ object ForskutteringApiSpek : Spek({
                 registrerForskutteringApi(forskutteringsClient)
             }
             application.install(ContentNegotiation) {
-                gson {
-                    setPrettyPrinting()
+                jackson {
+                    registerKotlinModule()
+                    registerModule(JavaTimeModule())
                 }
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333")) {
-                    response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"JA\"\\n}")
+                    response.content?.shouldEqual( "{\"forskuttering\":\"JA\"}")
                 }
             }
             it("Returnerer NEI hvis arbeidsgiver ikke forskutterer") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333")) {
-                    response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"NEI\"\\n}")
+                    response.content?.shouldEqual( "{\"forskuttering\":\"NEI\"}")
                 }
             }
             it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333")) {
-                    response.content?.shouldMatch( "\\{\\n\\s{2}\"forskuttering\":\\s\"UKJENT\"\\n}")
+                    response.content?.shouldEqual( "{\"forskuttering\":\"UKJENT\"}")
                 }
             }
         }
@@ -72,8 +75,9 @@ object ForskutteringApiSpek : Spek({
             initTestAuthentication()
             application.initRouting(applicationState, getEnvironment())
             application.install(ContentNegotiation) {
-                gson {
-                    setPrettyPrinting()
+                jackson {
+                    registerKotlinModule()
+                    registerModule(JavaTimeModule())
                 }
             }
             it("Returnerer feilmelding hvis aktørid mangler") {
@@ -111,14 +115,17 @@ val client = HttpClient(MockEngine) {
                 }
                 "https://login.microsoftonline.com/token" -> {
                     val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\",\"expires_on\":\"1558685836\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
                 }
                 else -> error("Unhandled ${request.url.fullUrl}")
             }
         }
     }
     install(JsonFeature) {
-        serializer = GsonSerializer()
+        serializer = JacksonSerializer {
+            registerKotlinModule()
+            registerModule(JavaTimeModule())
+        }
     }
 }
 
