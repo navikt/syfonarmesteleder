@@ -1,5 +1,6 @@
 package no.nav.syfo.narmestelederapi
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
@@ -64,8 +65,10 @@ class NarmesteLederClient(
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NarmesteLederResponse(val narmesteleder: NarmesteLeder?)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NarmesteLeder(
         val aktorId: String,
         val orgnummer: String,

@@ -1,6 +1,5 @@
 package no.nav.syfo.forskuttering
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.application.install
@@ -28,6 +27,7 @@ import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.Instant
 
 const val aktorIdMedForskuttering = 123
 const val aktorIdUtenForskuttering = 999
@@ -115,7 +115,8 @@ val client = HttpClient(MockEngine) {
                 }
                 "https://login.microsoftonline.com/token" -> {
                     val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\",\"expires_on\":\"1558685836\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                    val expiresOn: String = Instant.now().plusSeconds(120L).toString()
+                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\",\"expires_on\":\"$expiresOn\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
                 }
                 else -> error("Unhandled ${request.url.fullUrl}")
             }

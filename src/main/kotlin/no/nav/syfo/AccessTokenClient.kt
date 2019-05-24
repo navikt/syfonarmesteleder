@@ -8,6 +8,8 @@ import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -19,22 +21,31 @@ class AccessTokenClient(
         private val client: HttpClient
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
+    private val mutex = Mutex()
+    private var token: AadAccessToken? = null
 
     suspend fun hentAccessToken(resource: String): String {
-        log.trace("Henter token fra Azure AD")
-        val response: AadAccessToken = client.post(aadAccessTokenUrl) {
-            accept(ContentType.Application.Json)
-            method = HttpMethod.Post
-            body = FormDataContent(Parameters.build {
-                append("client_id", clientId)
-                append("resource", resource)
-                append("grant_type", "client_credentials")
-                append("client_secret", clientSecret)
-            })
+        val omToMinutter = Instant.now().plusSeconds(120L)
+        return mutex.withLock {
+            token
+                    ?.takeUnless { it.expires_on.isBefore(omToMinutter) }
+                    .run {
+                        log.info("Henter nytt token fra Azure AD")
+                        val response: AadAccessToken = client.post(aadAccessTokenUrl) {
+                            accept(ContentType.Application.Json)
+                            method = HttpMethod.Post
+                            body = FormDataContent(Parameters.build {
+                                append("client_id", clientId)
+                                append("resource", resource)
+                                append("grant_type", "client_credentials")
+                                append("client_secret", clientSecret)
+                            })
+                        }
+                        token = response
+                        log.debug("Har hentet accesstoken")
+                        return@run response
+                    }.access_token
         }
-        log.trace("Har hentet accesstoken")
-        System.out.println("Token med timestamp: " + response.expires_on)
-        return response.access_token
     }
 }
 
