@@ -22,9 +22,12 @@ import io.ktor.client.features.logging.Logger
 import io.ktor.client.features.logging.Logging
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
+import io.ktor.metrics.micrometer.MicrometerMetrics
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
@@ -98,6 +101,9 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
         install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.INFO
+        }
+        install(MicrometerMetrics) {
+            registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         }
     }
     val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
