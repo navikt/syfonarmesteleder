@@ -63,6 +63,9 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
                 configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             }
         }
+        install(MicrometerMetrics) {
+            registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+        }
         install(Authentication) {
             jwt {
                 verifier(jwkProvider, env.jwtIssuer)
@@ -102,10 +105,8 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
             logger = Logger.DEFAULT
             level = LogLevel.INFO
         }
-        install(MicrometerMetrics) {
-            registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-        }
     }
+
     val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         config()
         engine {
