@@ -1,5 +1,6 @@
 package no.nav.syfo.forskuttering
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.application.install
@@ -49,6 +50,7 @@ object ForskutteringApiSpek : Spek({
                 jackson {
                     registerKotlinModule()
                     registerModule(JavaTimeModule())
+                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 }
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
@@ -78,6 +80,7 @@ object ForskutteringApiSpek : Spek({
                 jackson {
                     registerKotlinModule()
                     registerModule(JavaTimeModule())
+                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 }
             }
             it("Returnerer feilmelding hvis aktørid mangler") {
@@ -126,6 +129,7 @@ val client = HttpClient(MockEngine) {
         serializer = JacksonSerializer {
             registerKotlinModule()
             registerModule(JavaTimeModule())
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         }
     }
 }
