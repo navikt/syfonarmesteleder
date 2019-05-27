@@ -28,9 +28,9 @@ class AccessTokenClient(
     suspend fun hentAccessToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
-            token
+            (token
                     ?.takeUnless { it.expires_on.isBefore(omToMinutter) }
-                    .run {
+                    ?: run {
                         log.info("Henter nytt token fra Azure AD")
                         val response: AadAccessToken = client.post(aadAccessTokenUrl) {
                             accept(ContentType.Application.Json)
@@ -45,7 +45,7 @@ class AccessTokenClient(
                         token = response
                         log.debug("Har hentet accesstoken")
                         return@run response
-                    }.access_token
+                    }).access_token
         }
     }
 }
