@@ -1,17 +1,18 @@
 package no.nav.syfo
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 
 const val vaultApplicationPropertiesPath = "/var/run/secrets/nais.io/vault/secrets.json"
 const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 const val defaultlocalEnvironmentPropertiesPath = "./src/main/resources/localEnvForTests.json"
+private val objectMapper: ObjectMapper = ObjectMapper()
 
 fun getEnvironment(): Environment {
+    objectMapper.registerKotlinModule()
     return if (appIsRunningLocally) {
-        Gson().fromJson(
-                firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath).readText(),
-                Environment::class.java)
+        objectMapper.readValue(firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath), Environment::class.java)
     } else {
         Environment(
                 getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -26,7 +27,7 @@ fun getEnvironment(): Environment {
                 getEnvVar("SYFOSOKNAD_ID"),
                 getEnvVar("SYFOVARSEL_ID"),
                 getEnvVar("CLIENT_ID"),
-                Gson().fromJson(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
+                objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
         )
     }
 }

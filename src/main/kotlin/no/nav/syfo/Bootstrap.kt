@@ -1,9 +1,9 @@
 package no.nav.syfo
 
 import com.auth0.jwk.JwkProviderBuilder
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializer
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
@@ -14,14 +14,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.engine.apache.ApacheEngineConfig
-import io.ktor.client.features.json.GsonSerializer
+import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.logging.DEFAULT
 import io.ktor.client.features.logging.LogLevel
 import io.ktor.client.features.logging.Logger
 import io.ktor.client.features.logging.Logging
 import io.ktor.features.ContentNegotiation
-import io.ktor.gson.gson
+import io.ktor.jackson.jackson
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -37,8 +37,6 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.net.URL
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -56,11 +54,10 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
                 .rateLimited(10, 1, TimeUnit.MINUTES)
                 .build()
         install(ContentNegotiation) {
-            gson {
-                setPrettyPrinting()
-                registerTypeAdapter(LocalDate::class.java, JsonSerializer<LocalDate> { src, _, _ ->
-                    src?.let { JsonPrimitive(it.format(DateTimeFormatter.ISO_LOCAL_DATE)) }
-                })
+            jackson {
+                registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             }
         }
         install(Authentication) {
@@ -92,12 +89,10 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
-            serializer = GsonSerializer {
-                registerTypeAdapter(
-                        LocalDate::class.java,
-                        JsonDeserializer<LocalDate> { json, _, _ ->
-                            json?.asString?.let { LocalDate.parse(it) }
-                        })
+            serializer = JacksonSerializer {
+                registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             }
         }
         install(Logging) {

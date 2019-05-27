@@ -1,11 +1,10 @@
 package no.nav.syfo.narmestelederapi
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
-import io.ktor.client.response.HttpResponse
 import io.ktor.http.ContentType
 import no.nav.syfo.AccessTokenClient
 import org.slf4j.MDC
@@ -19,16 +18,14 @@ class NarmesteLederClient(
 ) {
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(nlAktorId: String): List<NarmesteLederRelasjon> {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        // TODO: Remove this workaround whenever ktor issue #1009 is fixed
-        return client.get<HttpResponse>("$endpointUrl/arbeidsgiver/$nlAktorId/narmesteleder") {
+        return client.get<List<NarmesteLeder>>("$endpointUrl/arbeidsgiver/$nlAktorId/narmesteleder") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
                 append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }
-        }.use { it.call.response.receive<List<NarmesteLeder>>() }
-                .map {
+        }.map {
             NarmesteLederRelasjon(
                     aktorId = it.aktorId,
                     orgnummer = it.orgnummer,
@@ -44,16 +41,14 @@ class NarmesteLederClient(
 
     suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon? {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
-        // TODO: Remove this workaround whenever ktor issue #1009 is fixed
-        return client.get<HttpResponse>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
+        return client.get<NarmesteLederResponse>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
             accept(ContentType.Application.Json)
             headers {
                 append("Authorization", "Bearer $accessToken")
                 append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
                 append("Nav-Callid", MDC.get("Nav-Callid"))
             }
-        }.use { it.call.response.receive<NarmesteLederResponse>() }
-                .let {
+        }.let {
             it.narmesteleder
         }?.let {
             NarmesteLederRelasjon(
@@ -70,8 +65,10 @@ class NarmesteLederClient(
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NarmesteLederResponse(val narmesteleder: NarmesteLeder?)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NarmesteLeder(
         val aktorId: String,
         val orgnummer: String,
