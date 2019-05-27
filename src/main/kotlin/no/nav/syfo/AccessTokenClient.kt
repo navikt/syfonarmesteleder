@@ -22,6 +22,7 @@ class AccessTokenClient(
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
     private val mutex = Mutex()
+    @Volatile
     private var token: AadAccessToken? = null
 
     suspend fun hentAccessToken(resource: String): String {
