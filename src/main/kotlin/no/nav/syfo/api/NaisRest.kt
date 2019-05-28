@@ -37,7 +37,4 @@ fun Routing.registerNaisApi(
             TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
         }
     }
-    get("/prometheus-v2") {
-        call.respondText { PrometheusMeterRegistry(PrometheusConfig.DEFAULT).scrape() }
-    }
 }

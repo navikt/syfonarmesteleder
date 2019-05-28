@@ -26,8 +26,10 @@ import io.ktor.metrics.micrometer.MicrometerMetrics
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
@@ -64,7 +66,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
             }
         }
         install(MicrometerMetrics) {
-            registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+            registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
         }
         install(Authentication) {
             jwt {
