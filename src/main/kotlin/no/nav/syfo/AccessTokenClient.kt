@@ -23,12 +23,12 @@ class AccessTokenClient(
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
     private val mutex = Mutex()
     @Volatile
-    private var token: AadAccessToken? = null
+    private var tokenMap = HashMap<String, AadAccessToken>()
 
     suspend fun hentAccessToken(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
-            (token
+            (tokenMap[resource]
                     ?.takeUnless { it.expires_on.isBefore(omToMinutter) }
                     ?: run {
                         log.info("Henter nytt token fra Azure AD")
@@ -42,7 +42,7 @@ class AccessTokenClient(
                                 append("client_secret", clientSecret)
                             })
                         }
-                        token = response
+                        tokenMap[resource] = response
                         log.debug("Har hentet accesstoken")
                         return@run response
                     }).access_token
