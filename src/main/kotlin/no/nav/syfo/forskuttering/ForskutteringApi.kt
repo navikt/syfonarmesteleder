@@ -19,13 +19,14 @@ fun Route.registrerForskutteringApi(forskutteringsClient: ForskutteringsClient) 
             try {
                 val queryParameters: Parameters = request.queryParameters
                 val aktorId: String = queryParameters["aktorId"]?.takeIf { it.isNotEmpty() }
-                        ?: throw IllegalArgumentException("AktorId mangler")
+                    ?: throw IllegalArgumentException("AktorId mangler")
                 val orgnummer: String = queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
-                        ?: throw IllegalArgumentException("Orgnummer mangler")
+                    ?: throw IllegalArgumentException("Orgnummer mangler")
 
                 log.info("Mottatt forespørsel om forskuttering for aktør {} og orgnummer {}", aktorId, orgnummer)
 
-                val arbeidsgiverForskutterer = forskutteringsClient.hentForskutteringFraSyfoserviceStrangler(aktorId, orgnummer)
+                val arbeidsgiverForskutterer =
+                    forskutteringsClient.hentForskutteringFraSyfoserviceStrangler(aktorId, orgnummer)
                 call.respond(arbeidsgiverForskutterer)
 
             } catch (e: IllegalArgumentException) {

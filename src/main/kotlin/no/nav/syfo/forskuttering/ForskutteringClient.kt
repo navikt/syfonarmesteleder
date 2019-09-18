@@ -10,10 +10,10 @@ import no.nav.syfo.AccessTokenClient
 import org.slf4j.MDC
 
 class ForskutteringsClient(
-        private val endpointUrl: String,
-        private val resourceId: String,
-        private val accessTokenClient: AccessTokenClient,
-        private val client: HttpClient
+    private val endpointUrl: String,
+    private val resourceId: String,
+    private val accessTokenClient: AccessTokenClient,
+    private val client: HttpClient
 ) {
     suspend fun hentForskutteringFraSyfoserviceStrangler(aktorId: String, orgnummer: String): ForskutteringRespons {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)

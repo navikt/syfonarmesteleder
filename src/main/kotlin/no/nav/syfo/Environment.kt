@@ -12,22 +12,25 @@ private val objectMapper: ObjectMapper = ObjectMapper()
 fun getEnvironment(): Environment {
     objectMapper.registerKotlinModule()
     return if (appIsRunningLocally) {
-        objectMapper.readValue(firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath), Environment::class.java)
+        objectMapper.readValue(
+            firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath),
+            Environment::class.java
+        )
     } else {
         Environment(
-                getEnvVar("APPLICATION_PORT", "8080").toInt(),
-                getEnvVar("APPLICATION_THREADS", "4").toInt(),
-                getEnvVar("SERVICESTRANGLER_URL", "http://syfoservicestrangler"),
-                getEnvVar("SERVICESTRANGLER_ID"),
-                getEnvVar("ARBEIDSGIVERTILGANG_ID"),
-                getEnvVar("AADACCESSTOKEN_URL"),
-                getEnvVar("AADDISCOVERY_URL"),
-                getEnvVar("JWKKEYS_URL", "https://login.microsoftonline.com/common/discovery/keys"),
-                getEnvVar("JWT_ISSUER"),
-                getEnvVar("SYFOSOKNAD_ID"),
-                getEnvVar("SYFOVARSEL_ID"),
-                getEnvVar("CLIENT_ID"),
-                objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
+            getEnvVar("APPLICATION_PORT", "8080").toInt(),
+            getEnvVar("APPLICATION_THREADS", "4").toInt(),
+            getEnvVar("SERVICESTRANGLER_URL", "http://syfoservicestrangler"),
+            getEnvVar("SERVICESTRANGLER_ID"),
+            getEnvVar("ARBEIDSGIVERTILGANG_ID"),
+            getEnvVar("AADACCESSTOKEN_URL"),
+            getEnvVar("AADDISCOVERY_URL"),
+            getEnvVar("JWKKEYS_URL", "https://login.microsoftonline.com/common/discovery/keys"),
+            getEnvVar("JWT_ISSUER"),
+            getEnvVar("SYFOSOKNAD_ID"),
+            getEnvVar("SYFOVARSEL_ID"),
+            getEnvVar("CLIENT_ID"),
+            objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
         )
     }
 }
@@ -35,28 +38,28 @@ fun getEnvironment(): Environment {
 val appIsRunningLocally: Boolean = System.getenv("NAIS_CLUSTER_NAME").isNullOrEmpty()
 
 data class Environment(
-        val applicationPort: Int,
-        val applicationThreads: Int,
-        val servicestranglerUrl: String,
-        val servicestranglerId: String,
-        val arbeidsgivertilgangId: String,
-        val aadAccessTokenUrl: String,
-        val aadDiscoveryUrl: String,
-        val jwkKeysUrl: String,
-        val jwtIssuer: String,
-        val syfosoknadId: String,
-        val syfovarselId: String,
-        val clientid: String,
-        val credentials: VaultCredentials
+    val applicationPort: Int,
+    val applicationThreads: Int,
+    val servicestranglerUrl: String,
+    val servicestranglerId: String,
+    val arbeidsgivertilgangId: String,
+    val aadAccessTokenUrl: String,
+    val aadDiscoveryUrl: String,
+    val jwkKeysUrl: String,
+    val jwtIssuer: String,
+    val syfosoknadId: String,
+    val syfovarselId: String,
+    val clientid: String,
+    val credentials: VaultCredentials
 )
 
 data class VaultCredentials(
-        val clientsecret: String
+    val clientsecret: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
-        System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
+    System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
 private fun firstExistingFile(vararg paths: String) = paths
-        .map(::File)
-        .first(File::exists)
+    .map(::File)
+    .first(File::exists)

@@ -61,9 +61,9 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     val applicationState = ApplicationState()
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
-                .cached(10, 24, TimeUnit.HOURS)
-                .rateLimited(10, 1, TimeUnit.MINUTES)
-                .build()
+            .cached(10, 24, TimeUnit.HOURS)
+            .rateLimited(10, 1, TimeUnit.MINUTES)
+            .build()
         install(ContentNegotiation) {
             jackson {
                 registerKotlinModule()
@@ -72,7 +72,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
             }
         }
         install(MicrometerMetrics) {
-            registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
+            registry =
+                PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
             meterBinders = listOf(
                 ClassLoaderMetrics(),
                 JvmMemoryMetrics(),
@@ -135,18 +136,21 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
     val httpClientWithProxy = HttpClient(Apache, proxyConfig)
     val httpClient = HttpClient(Apache, config)
 
-    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClientWithProxy)
-    val forskutteringsClient = ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
-    val narmesteLederClient = NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+    val accessTokenClient =
+        AccessTokenClient(env.aadAccessTokenUrl, env.clientid, env.credentials.clientsecret, httpClientWithProxy)
+    val forskutteringsClient =
+        ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+    val narmesteLederClient =
+        NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
 
     routing {
         registerNaisApi(
-                readynessCheck = {
-                    applicationState.initialized
-                },
-                livenessCheck = {
-                    applicationState.running
-                }
+            readynessCheck = {
+                applicationState.initialized
+            },
+            livenessCheck = {
+                applicationState.running
+            }
         )
         authenticate {
             registrerForskutteringApi(forskutteringsClient)

@@ -16,7 +16,7 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
         withTraceInterceptor {
             try {
                 val narmesteLederAktorId: String = call.parameters["narmesteLederAktorId"]?.takeIf { it.isNotEmpty() }
-                        ?: throw IllegalArgumentException("NarmesteLederAktorId mangler")
+                    ?: throw IllegalArgumentException("NarmesteLederAktorId mangler")
 
                 log.info("Mottatt forespørsel om nærmeste leder-relasjoner for leder {}", narmesteLederAktorId)
 
@@ -33,11 +33,12 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
         withTraceInterceptor {
             try {
                 val sykmeldtAktorId: String = call.parameters["sykmeldtAktorId"]?.takeIf { it.isNotEmpty() }
-                        ?: throw IllegalArgumentException("sykmeldtAktorId mangler")
+                    ?: throw IllegalArgumentException("sykmeldtAktorId mangler")
                 val orgnummer: String = call.request.queryParameters["orgnummer"]?.takeIf { it.isNotEmpty() }
-                        ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
+                    ?: throw NotImplementedError("Spørring uten orgnummer er ikke implementert")
 
-                val narmesteLederRelasjon = narmesteLederClient.hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer)
+                val narmesteLederRelasjon =
+                    narmesteLederClient.hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId, orgnummer)
                 call.respond(mapOf("narmesteLederRelasjon" to narmesteLederRelasjon))
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder da aktørid mangler: {}", e.message)

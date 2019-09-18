@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 
 class AccessTokenClient(
-        private val aadAccessTokenUrl: String,
-        private val clientId: String,
-        private val clientSecret: String,
-        private val client: HttpClient
+    private val aadAccessTokenUrl: String,
+    private val clientId: String,
+    private val clientSecret: String,
+    private val client: HttpClient
 ) {
     private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
     private val mutex = Mutex()
@@ -29,29 +29,29 @@ class AccessTokenClient(
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
             (tokenMap[resource]
-                    ?.takeUnless { it.expires_on.isBefore(omToMinutter) }
-                    ?: run {
-                        log.info("Henter nytt token fra Azure AD")
-                        val response: AadAccessToken = client.post(aadAccessTokenUrl) {
-                            accept(ContentType.Application.Json)
-                            method = HttpMethod.Post
-                            body = FormDataContent(Parameters.build {
-                                append("client_id", clientId)
-                                append("resource", resource)
-                                append("grant_type", "client_credentials")
-                                append("client_secret", clientSecret)
-                            })
-                        }
-                        tokenMap[resource] = response
-                        log.debug("Har hentet accesstoken")
-                        return@run response
-                    }).access_token
+                ?.takeUnless { it.expires_on.isBefore(omToMinutter) }
+                ?: run {
+                    log.info("Henter nytt token fra Azure AD")
+                    val response: AadAccessToken = client.post(aadAccessTokenUrl) {
+                        accept(ContentType.Application.Json)
+                        method = HttpMethod.Post
+                        body = FormDataContent(Parameters.build {
+                            append("client_id", clientId)
+                            append("resource", resource)
+                            append("grant_type", "client_credentials")
+                            append("client_secret", clientSecret)
+                        })
+                    }
+                    tokenMap[resource] = response
+                    log.debug("Har hentet accesstoken")
+                    return@run response
+                }).access_token
         }
     }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class AadAccessToken(
-        val access_token: String,
-        val expires_on: Instant
+    val access_token: String,
+    val expires_on: Instant
 )
