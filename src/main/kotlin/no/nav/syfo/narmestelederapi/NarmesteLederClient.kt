@@ -11,10 +11,10 @@ import org.slf4j.MDC
 import java.time.LocalDate
 
 class NarmesteLederClient(
-        private val endpointUrl: String,
-        private val resourceId: String,
-        private val accessTokenClient: AccessTokenClient,
-        private val client: HttpClient
+    private val endpointUrl: String,
+    private val resourceId: String,
+    private val accessTokenClient: AccessTokenClient,
+    private val client: HttpClient
 ) {
     suspend fun hentNarmesteLederFraSyfoserviceStrangler(nlAktorId: String): List<NarmesteLederRelasjon> {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
@@ -27,19 +27,23 @@ class NarmesteLederClient(
             }
         }.map {
             NarmesteLederRelasjon(
-                    aktorId = it.aktorId,
-                    orgnummer = it.orgnummer,
-                    narmesteLederAktorId = it.nlAktorId,
-                    narmesteLederTelefonnummer = it.nlTelefonnummer,
-                    narmesteLederEpost = it.nlEpost,
-                    aktivFom = it.aktivFom,
-                    arbeidsgiverForskutterer = it.agForskutterer,
-                    skrivetilgang = true,
-                    tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN))
+                aktorId = it.aktorId,
+                orgnummer = it.orgnummer,
+                narmesteLederAktorId = it.nlAktorId,
+                narmesteLederTelefonnummer = it.nlTelefonnummer,
+                narmesteLederEpost = it.nlEpost,
+                aktivFom = it.aktivFom,
+                arbeidsgiverForskutterer = it.agForskutterer,
+                skrivetilgang = true,
+                tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
+            )
         }
     }
 
-    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String, orgnummer: String): NarmesteLederRelasjon? {
+    suspend fun hentNarmesteLederForSykmeldtFraSyfoserviceStrangler(
+        sykmeldtAktorId: String,
+        orgnummer: String
+    ): NarmesteLederRelasjon? {
         val accessToken = accessTokenClient.hentAccessToken(resourceId)
         return client.get<NarmesteLederResponse>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteleder?orgnummer=$orgnummer") {
             accept(ContentType.Application.Json)
@@ -52,15 +56,16 @@ class NarmesteLederClient(
             it.narmesteleder
         }?.let {
             NarmesteLederRelasjon(
-                    aktorId = it.aktorId,
-                    orgnummer = it.orgnummer,
-                    narmesteLederAktorId = it.nlAktorId,
-                    narmesteLederTelefonnummer = it.nlTelefonnummer,
-                    narmesteLederEpost = it.nlEpost,
-                    aktivFom = it.aktivFom,
-                    arbeidsgiverForskutterer = it.agForskutterer,
-                    skrivetilgang = true,
-                    tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN))
+                aktorId = it.aktorId,
+                orgnummer = it.orgnummer,
+                narmesteLederAktorId = it.nlAktorId,
+                narmesteLederTelefonnummer = it.nlTelefonnummer,
+                narmesteLederEpost = it.nlEpost,
+                aktivFom = it.aktivFom,
+                arbeidsgiverForskutterer = it.agForskutterer,
+                skrivetilgang = true,
+                tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
+            )
         }
     }
 }
@@ -70,11 +75,11 @@ data class NarmesteLederResponse(val narmesteleder: NarmesteLeder?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class NarmesteLeder(
-        val aktorId: String,
-        val orgnummer: String,
-        val nlAktorId: String,
-        val nlTelefonnummer: String?,
-        val nlEpost: String?,
-        val aktivFom: LocalDate,
-        val agForskutterer: Boolean?
+    val aktorId: String,
+    val orgnummer: String,
+    val nlAktorId: String,
+    val nlTelefonnummer: String?,
+    val nlEpost: String?,
+    val aktivFom: LocalDate,
+    val agForskutterer: Boolean?
 )
