@@ -40,6 +40,8 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.db.Database
+import no.nav.syfo.db.VaultCredentialService
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
@@ -59,6 +61,10 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     val env = getEnvironment()
     val authorizedUsers = listOf(env.syfosoknadId, env.syfovarselId, env.arbeidsgivertilgangId)
     val applicationState = ApplicationState()
+
+    val vaultCredentialService = VaultCredentialService()
+    val database = Database(env, vaultCredentialService)
+
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
             .cached(10, 24, TimeUnit.HOURS)
