@@ -33,18 +33,18 @@ class VaultCredentialService() {
 
     fun getNewCredentials(mountPath: String, databaseName: String, role: Role): VaultCredentials {
         val path = "$mountPath/creds/$databaseName-$role"
-        log.debug("Getting database credentials for path '$path'")
+        log.debug("Hender database credentials fra path '$path'")
         try {
             val response = Vault.client.logical().read(path)
-            val username = checkNotNull(response.data["username"]) { "Username is not set in response from Vault" }
-            val password = checkNotNull(response.data["password"]) { "Password is not set in response from Vault" }
+            val username = checkNotNull(response.data["username"]) { "Fant ikke username i responsen fra Vault" }
+            val password = checkNotNull(response.data["password"]) { "Fant ikke password i responsen from Vault" }
             log.debug("Got new credentials (username=$username, leaseDuration=${response.leaseDuration})")
             leaseDuration = response.leaseDuration
             return VaultCredentials(response.leaseId, username, password)
         } catch (e: VaultException) {
             when (e.httpStatusCode) {
-                403 -> log.error("Vault denied permission to fetch database credentials for path '$path'", e)
-                else -> log.error("Could not fetch database credentials for path '$path'", e)
+                403 -> log.error("Vault avviste tilgang til å hente database credentials fra path '$path'", e)
+                else -> log.error("Kunne ikke hente database credentials fra path '$path'", e)
             }
             throw e
         }
