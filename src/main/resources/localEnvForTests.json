@@ -13,5 +13,6 @@
     "clientid": "999999",
     "credentials": {
       "clientsecret": "12345"
-    }
+    },
+    "syfonarmestelederDBURL": "https://database.path"
 }

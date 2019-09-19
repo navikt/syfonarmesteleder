@@ -1,6 +1,7 @@
 package no.nav.syfo
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 
@@ -12,45 +13,31 @@ private val objectMapper: ObjectMapper = ObjectMapper()
 fun getEnvironment(): Environment {
     objectMapper.registerKotlinModule()
     return if (appIsRunningLocally) {
-        objectMapper.readValue(
-            firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath),
-            Environment::class.java
-        )
+        objectMapper.readValue(firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath))
     } else {
-        Environment(
-            getEnvVar("APPLICATION_PORT", "8080").toInt(),
-            getEnvVar("APPLICATION_THREADS", "4").toInt(),
-            getEnvVar("SERVICESTRANGLER_URL", "http://syfoservicestrangler"),
-            getEnvVar("SERVICESTRANGLER_ID"),
-            getEnvVar("ARBEIDSGIVERTILGANG_ID"),
-            getEnvVar("AADACCESSTOKEN_URL"),
-            getEnvVar("AADDISCOVERY_URL"),
-            getEnvVar("JWKKEYS_URL", "https://login.microsoftonline.com/common/discovery/keys"),
-            getEnvVar("JWT_ISSUER"),
-            getEnvVar("SYFOSOKNAD_ID"),
-            getEnvVar("SYFOVARSEL_ID"),
-            getEnvVar("CLIENT_ID"),
-            objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
-        )
+        Environment()
     }
 }
 
 val appIsRunningLocally: Boolean = System.getenv("NAIS_CLUSTER_NAME").isNullOrEmpty()
 
 data class Environment(
-    val applicationPort: Int,
-    val applicationThreads: Int,
-    val servicestranglerUrl: String,
-    val servicestranglerId: String,
-    val arbeidsgivertilgangId: String,
-    val aadAccessTokenUrl: String,
-    val aadDiscoveryUrl: String,
-    val jwkKeysUrl: String,
-    val jwtIssuer: String,
-    val syfosoknadId: String,
-    val syfovarselId: String,
-    val clientid: String,
-    val credentials: VaultCredentials
+    val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
+    val applicationThreads: Int = getEnvVar("APPLICATION_THREADS", "4").toInt(),
+    val servicestranglerUrl: String = getEnvVar("SERVICESTRANGLER_URL", "http://syfoservicestrangler"),
+    val servicestranglerId: String = getEnvVar("SERVICESTRANGLER_ID"),
+    val arbeidsgivertilgangId: String = getEnvVar("ARBEIDSGIVERTILGANG_ID"),
+    val aadAccessTokenUrl: String = getEnvVar("AADACCESSTOKEN_URL"),
+    val aadDiscoveryUrl: String = getEnvVar("AADDISCOVERY_URL"),
+    val jwkKeysUrl: String = getEnvVar("JWKKEYS_URL", "https://login.microsoftonline.com/common/discovery/keys"),
+    val jwtIssuer: String = getEnvVar("JWT_ISSUER"),
+    val syfosoknadId: String = getEnvVar("SYFOSOKNAD_ID"),
+    val syfovarselId: String = getEnvVar("SYFOVARSEL_ID"),
+    val clientid: String = getEnvVar("CLIENT_ID"),
+    val credentials: VaultCredentials = objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java),
+    val databaseName: String = getEnvVar("DATABASE_NAME", "syfonarmesteleder"),
+    val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
+    val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT", vaultApplicationPropertiesPath)
 )
 
 data class VaultCredentials(

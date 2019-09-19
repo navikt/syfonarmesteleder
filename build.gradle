@@ -6,7 +6,12 @@ buildscript {
     ext.prometheus_version = '0.5.0'
     ext.spek_version = "2.0.4"
     ext.logstash_encoder_version = '5.1'
-    ext.jackson_version='2.9.8'
+    ext.jackson_version = '2.9.8'
+    ext.hikariVersion = '3.3.0'
+    ext.flywayVersion = '5.2.4'
+    ext.h2Version = '1.4.197'
+    ext.postgresVersion = '42.2.5'
+    ext.vaultJavaDriveVersion = '3.1.0'
 }
 
 plugins {
@@ -18,7 +23,7 @@ plugins {
 group 'no.nav.syfo'
 version '1.0-SNAPSHOT'
 
-jar.manifest.attributes("Main-Class" : "no.nav.syfo.BootstrapKt")
+jar.manifest.attributes("Main-Class": "no.nav.syfo.BootstrapKt")
 
 repositories {
     mavenCentral()
@@ -26,7 +31,7 @@ repositories {
     maven { url "https://dl.bintray.com/kotlin/ktor" }
     maven { url 'https://repo.adeo.no/repository/maven-releases/' }
     maven { url "https://dl.bintray.com/spekframework/spek-dev" }
-    maven { url "https://dl.bintray.com/kotlin/kotlinx/"}
+    maven { url "https://dl.bintray.com/kotlin/kotlinx/" }
 }
 
 test {
@@ -48,6 +53,14 @@ dependencies {
     implementation "io.ktor:ktor-client-apache:$ktor_version"
     implementation "io.ktor:ktor-client-logging:$ktor_version"
     implementation "io.ktor:ktor-client-logging-jvm:$ktor_version"
+
+    //Database
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.h2database:h2:$h2Version")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("com.bettercloud:vault-java-driver:$vaultJavaDriveVersion")
+
 
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "net.logstash.logback:logstash-logback-encoder:$logstash_encoder_version"
