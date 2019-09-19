@@ -26,7 +26,7 @@ class Database(
         runFlywayMigrations()
 
         val initialCredentials = vaultCredentialService.getNewCredentials(
-            mountPath = env.mountPathVault,
+            mountPath = env.vaultPostgresPath,
             databaseName = env.databaseName,
             role = Role.USER
         )
@@ -42,7 +42,7 @@ class Database(
 
         vaultCredentialService.renewCredentialsTaskData = RenewCredentialsTaskData(
             dataSource = dataSource,
-            mountPath = env.mountPathVault,
+            mountPath = env.vaultPostgresPath,
             databaseName = env.databaseName,
             role = Role.USER
         )
@@ -50,7 +50,7 @@ class Database(
 
     private fun runFlywayMigrations() = Flyway.configure().run {
         val credentials = vaultCredentialService.getNewCredentials(
-            mountPath = env.mountPathVault,
+            mountPath = env.vaultPostgresPath,
             databaseName = env.databaseName,
             role = Role.ADMIN
         )

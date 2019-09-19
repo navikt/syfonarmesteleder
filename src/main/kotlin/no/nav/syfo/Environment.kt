@@ -37,7 +37,7 @@ data class Environment(
     val credentials: VaultCredentials = objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java),
     val databaseName: String = getEnvVar("DATABASE_NAME", "syfonarmesteleder"),
     val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
-    val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT", vaultApplicationPropertiesPath)
+    val vaultPostgresPath: String = getEnvVar("VAULT_POSTGRES_PATH")
 )
 
 data class VaultCredentials(

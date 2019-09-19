@@ -14,5 +14,6 @@
     "credentials": {
       "clientsecret": "12345"
     },
-    "syfonarmestelederDBURL": "https://database.path"
+    "syfonarmestelederDBURL": "https://database.path",
+    "vaultPostgresPath": "/vault/postgress/path"
 }
