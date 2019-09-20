@@ -1,8 +1,11 @@
 package no.nav.syfo
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.application.Application
 import io.ktor.application.install
@@ -36,8 +39,11 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
@@ -46,17 +52,34 @@ import no.nav.syfo.db.Database
 import no.nav.syfo.db.VaultCredentialService
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
+import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
+import no.nav.syfo.syfoservice.NarmesteLederDTO
+import no.nav.syfo.syfoservice.leggTilForskutteringer
+import no.nav.syfo.syfoservice.leggTilNarmesteLedere
+import no.nav.syfo.syfoservice.toForskutteringDAO
+import no.nav.syfo.syfoservice.toNarmesteLederDAO
 import no.nav.syfo.vault.Vault
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.net.URL
+import java.time.Duration
+import java.util.Properties
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
+
+val objectMapper: ObjectMapper = ObjectMapper().apply {
+    registerKotlinModule()
+    registerModule(JavaTimeModule())
+    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+}
 
 private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
@@ -66,6 +89,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     val env = getEnvironment()
     val authorizedUsers = listOf(env.syfosoknadId, env.syfovarselId, env.arbeidsgivertilgangId)
     val applicationState = ApplicationState()
+
+    val consumerProperties = loadBaseConfig(env).toConsumerConfig()
 
     val vaultCredentialService = VaultCredentialService()
     val database = Database(env, vaultCredentialService)
@@ -85,6 +110,13 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
             applicationState.running = false
         }
     }
+
+    launchListeners(
+        env,
+        applicationState,
+        database,
+        consumerProperties
+    )
 
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
@@ -134,6 +166,52 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     })
 
     applicationState.initialized = true
+}
+
+
+fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
+    launch {
+        try {
+            action()
+        } finally {
+            applicationState.running = false
+        }
+    }
+
+suspend fun blockingApplicationLogicRecievedNarmesteLeder(
+    applicationState: ApplicationState,
+    kafkaconsumer: KafkaConsumer<String, String>,
+    database: Database
+) {
+    while (applicationState.running) {
+        val narmesteLedere: List<NarmesteLederDTO> = kafkaconsumer
+            .poll(Duration.ofMillis(0))
+            .map { objectMapper.readValue<NarmesteLederDTO>(it.value()) }
+        database.leggTilForskutteringer(narmesteLedere.map { it.toForskutteringDAO() })
+        database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
+        log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
+    }
+    delay(100)
+}
+
+fun CoroutineScope.launchListeners(
+    env: Environment,
+    applicationState: ApplicationState,
+    database: Database,
+    consumerProperties: Properties
+) {
+    val narmesteLederTopic = 0.until(env.applicationThreads).map {
+        val kafkaconsumernarmesteLeder = KafkaConsumer<String, String>(consumerProperties)
+
+        kafkaconsumernarmesteLeder.subscribe(listOf("helse-narmesteLeder-v1"))
+
+        createListener(applicationState) {
+            blockingApplicationLogicRecievedNarmesteLeder(applicationState, kafkaconsumernarmesteLeder, database)
+        }
+    }.toList()
+
+    applicationState.initialized = true
+    runBlocking { narmesteLederTopic.forEach { it.join() } }
 }
 
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {

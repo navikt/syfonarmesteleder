@@ -8,12 +8,12 @@ import java.io.File
 const val vaultApplicationPropertiesPath = "/var/run/secrets/nais.io/vault/secrets.json"
 const val localEnvironmentPropertiesPath = "./src/main/resources/localEnv.json"
 const val defaultlocalEnvironmentPropertiesPath = "./src/main/resources/localEnvForTests.json"
-private val objectMapper: ObjectMapper = ObjectMapper()
+private val environmentMapper: ObjectMapper = ObjectMapper()
 
 fun getEnvironment(): Environment {
-    objectMapper.registerKotlinModule()
+    environmentMapper.registerKotlinModule()
     return if (appIsRunningLocally) {
-        objectMapper.readValue(firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath))
+        environmentMapper.readValue(firstExistingFile(localEnvironmentPropertiesPath, defaultlocalEnvironmentPropertiesPath))
     } else {
         Environment()
     }
@@ -34,10 +34,16 @@ data class Environment(
     val syfosoknadId: String = getEnvVar("SYFOSOKNAD_ID"),
     val syfovarselId: String = getEnvVar("SYFOVARSEL_ID"),
     val clientid: String = getEnvVar("CLIENT_ID"),
-    val credentials: VaultCredentials = objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java),
+    val credentials: VaultCredentials = objectMapper.readValue(
+        File(vaultApplicationPropertiesPath).readText(),
+        VaultCredentials::class.java
+    ),
     val databaseName: String = getEnvVar("DATABASE_NAME", "syfonarmesteleder"),
     val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
-    val vaultPostgresPath: String = getEnvVar("VAULT_POSTGRES_PATH")
+    val vaultPostgresPath: String = getEnvVar("VAULT_POSTGRES_PATH"),
+    val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+    val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
+    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD")
 )
 
 data class VaultCredentials(

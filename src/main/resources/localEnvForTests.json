@@ -15,5 +15,8 @@
       "clientsecret": "12345"
     },
     "syfonarmestelederDBURL": "https://database.path",
-    "vaultPostgresPath": "/vault/postgress/path"
+    "vaultPostgresPath": "/vault/postgress/path",
+    "kafkaBootstrapServers": "/bootstrap-url/",
+    "serviceuserUsername": "username",
+    "serviceuserPassword": "password"
 }

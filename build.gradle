@@ -12,6 +12,7 @@ buildscript {
     ext.h2Version = '1.4.197'
     ext.postgresVersion = '42.2.5'
     ext.vaultJavaDriveVersion = '3.1.0'
+    ext.kafkaVersion = '2.0.0'
 }
 
 plugins {
@@ -55,6 +56,8 @@ dependencies {
     implementation "io.ktor:ktor-client-apache:$ktor_version"
     implementation "io.ktor:ktor-client-logging:$ktor_version"
     implementation "io.ktor:ktor-client-logging-jvm:$ktor_version"
+
+    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
 
     //Database
     implementation("org.postgresql:postgresql:$postgresVersion")
