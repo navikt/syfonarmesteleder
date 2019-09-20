@@ -38,7 +38,9 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.VaultCredentialService
@@ -46,6 +48,7 @@ import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
+import no.nav.syfo.vault.Vault
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
@@ -57,6 +60,8 @@ data class ApplicationState(var running: Boolean = true, var initialized: Boolea
 
 private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
+val backgroundTasksContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher() + MDCContext()
+
 fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = getEnvironment()
     val authorizedUsers = listOf(env.syfosoknadId, env.syfovarselId, env.arbeidsgivertilgangId)
@@ -64,6 +69,22 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
     val vaultCredentialService = VaultCredentialService()
     val database = Database(env, vaultCredentialService)
+
+    launch(backgroundTasksContext) {
+        try {
+            Vault.renewVaultTokenTask(applicationState)
+        } finally {
+            applicationState.running = false
+        }
+    }
+
+    launch(backgroundTasksContext) {
+        try {
+            vaultCredentialService.runRenewCredentialsTask { applicationState.running }
+        } finally {
+            applicationState.running = false
+        }
+    }
 
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
