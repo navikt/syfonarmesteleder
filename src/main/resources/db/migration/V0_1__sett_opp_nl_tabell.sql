@@ -12,8 +12,9 @@ CREATE TABLE NARMESTE_LEDER
 
 CREATE TABLE FORSKUTTERING
 (
-    bruker_fnr                VARCHAR(64) PRIMARY KEY,
-    orgnummer                 VARCHAR(64) PRIMARY KEY,
+    bruker_fnr                VARCHAR(64) NOT NULL ,
+    orgnummer                 VARCHAR(64) NOT NULL ,
     arbeidsgiver_forskutterer BOOLEAN   NOT NULL,
-    sist_oppdatert            TIMESTAMP NOT NULL
+    sist_oppdatert            TIMESTAMP NOT NULL,
+    PRIMARY KEY (bruker_fnr, orgnummer)
 )
