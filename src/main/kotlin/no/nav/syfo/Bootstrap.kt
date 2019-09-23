@@ -189,9 +189,11 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
             .map { objectMapper.readValue<NarmesteLederDTO>(it.value()) }
         database.leggTilForskutteringer(narmesteLedere.map { it.toForskutteringDAO() })
         database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
-        log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
+        if (narmesteLedere.isNotEmpty()) {
+            log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
+        }
+        delay(100)
     }
-    delay(100)
 }
 
 fun CoroutineScope.launchListeners(
