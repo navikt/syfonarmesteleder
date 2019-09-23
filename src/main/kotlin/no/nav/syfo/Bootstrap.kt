@@ -40,6 +40,7 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
@@ -47,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
+import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.db.Database
 import no.nav.syfo.db.VaultCredentialService
@@ -167,12 +169,13 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
     applicationState.initialized = true
 }
-
-
-fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
-    launch {
+fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
+    GlobalScope.launch {
         try {
             action()
+        } catch (e: TrackableException) {
+            log.error("En uhåndtert feil oppstod, applikasjonen restarter {}",
+                fields(e.loggingMeta), e.cause)
         } finally {
             applicationState.running = false
         }
@@ -196,6 +199,8 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
         delay(100)
     }
 }
+
+
 
 fun CoroutineScope.launchListeners(
     env: Environment,
