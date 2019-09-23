@@ -40,7 +40,6 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
@@ -169,13 +168,39 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
     applicationState.initialized = true
 }
-fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
-    GlobalScope.launch {
+
+fun CoroutineScope.launchListeners(
+    env: Environment,
+    applicationState: ApplicationState,
+    database: Database,
+    consumerProperties: Properties
+): List<Job> {
+    val narmesteLederTopic = 0.until(env.applicationThreads).map {
+        val kafkaconsumernarmesteLeder = KafkaConsumer<String, String>(consumerProperties)
+
+        kafkaconsumernarmesteLeder.subscribe(listOf("helse-narmesteLeder-v1"))
+
+        createListener(applicationState) {
+            blockingApplicationLogicRecievedNarmesteLeder(applicationState, kafkaconsumernarmesteLeder, database)
+        }
+    }.toList()
+
+    applicationState.initialized = true
+    return narmesteLederTopic
+}
+
+fun CoroutineScope.createListener(
+    applicationState: ApplicationState,
+    action: suspend CoroutineScope.() -> Unit
+): Job =
+    launch {
         try {
             action()
         } catch (e: TrackableException) {
-            log.error("En uhåndtert feil oppstod, applikasjonen restarter {}",
-                fields(e.loggingMeta), e.cause)
+            log.error(
+                "En uhåndtert feil oppstod, applikasjonen restarter {}",
+                fields(e.loggingMeta), e.cause
+            )
         } finally {
             applicationState.running = false
         }
@@ -198,28 +223,6 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
 
         delay(100)
     }
-}
-
-
-
-fun CoroutineScope.launchListeners(
-    env: Environment,
-    applicationState: ApplicationState,
-    database: Database,
-    consumerProperties: Properties
-) {
-    val narmesteLederTopic = 0.until(env.applicationThreads).map {
-        val kafkaconsumernarmesteLeder = KafkaConsumer<String, String>(consumerProperties)
-
-        kafkaconsumernarmesteLeder.subscribe(listOf("helse-narmesteLeder-v1"))
-
-        createListener(applicationState) {
-            blockingApplicationLogicRecievedNarmesteLeder(applicationState, kafkaconsumernarmesteLeder, database)
-        }
-    }.toList()
-
-    applicationState.initialized = true
-    runBlocking { narmesteLederTopic.forEach { it.join() } }
 }
 
 fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
