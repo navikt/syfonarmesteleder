@@ -187,9 +187,9 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
         val narmesteLedere: List<NarmesteLederDTO> = kafkaconsumer
             .poll(Duration.ofMillis(0))
             .map { objectMapper.readValue<NarmesteLederDTO>(it.value()) }
-        database.leggTilForskutteringer(narmesteLedere.map { it.toForskutteringDAO() })
-        database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
         if (narmesteLedere.isNotEmpty()) {
+            database.leggTilForskutteringer(narmesteLedere.map { it.toForskutteringDAO() })
+            database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
             log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
         }
         delay(100)
