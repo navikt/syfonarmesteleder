@@ -111,12 +111,12 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
         }
     }
 
-    launchListeners(
-        env,
-        applicationState,
-        database,
-        consumerProperties
-    )
+    //    launchListeners(
+    //        env,
+    //        applicationState,
+    //        database,
+    //        consumerProperties
+    //    )
 
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
