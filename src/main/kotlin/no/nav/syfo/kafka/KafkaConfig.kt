@@ -9,7 +9,7 @@ import java.util.Properties
 fun loadBaseConfig(env: Environment): Properties = Properties().also {
     it.load(KafkaConfig::class.java.getResourceAsStream("/kafka_base.properties"))
     it["sasl.jaas.config"] = "org.apache.kafka.common.security.plain.PlainLoginModule required " +
-            "username=\"${env.serviceuserUsername}\" password=\"${env.serviceuserPassword}\";"
+            "username=\"${env.credentials.serviceuserUsername}\" password=\"${env.credentials.serviceuserPassword}\";"
     it["bootstrap.servers"] = env.kafkaBootstrapServers
     it["specific.avro.reader"] = true
 }

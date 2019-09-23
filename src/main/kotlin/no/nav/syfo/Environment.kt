@@ -41,13 +41,13 @@ data class Environment(
     val databaseName: String = getEnvVar("DATABASE_NAME", "syfonarmesteleder"),
     val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
     val vaultPostgresPath: String = getEnvVar("VAULT_POSTGRES_PATH"),
-    val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-    val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
-    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD")
+    val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL")
 )
 
 data class VaultCredentials(
-    val clientsecret: String
+    val clientsecret: String,
+    val serviceuserUsername: String,
+    val serviceuserPassword: String
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
