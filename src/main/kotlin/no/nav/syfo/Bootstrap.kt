@@ -111,12 +111,12 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
         }
     }
 
-    //    launchListeners(
-    //        env,
-    //        applicationState,
-    //        database,
-    //        consumerProperties
-    //    )
+    launchListeners(
+        env,
+        applicationState,
+        database,
+        consumerProperties
+    )
 
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
@@ -183,6 +183,7 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
     kafkaconsumer: KafkaConsumer<String, String>,
     database: Database
 ) {
+    log.info("Kjører run blocking mottak av nærmeste ledere")
     while (applicationState.running) {
         val narmesteLedere: List<NarmesteLederDTO> = kafkaconsumer
             .poll(Duration.ofMillis(0))
@@ -192,6 +193,7 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
             database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
             log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
         }
+
         delay(100)
     }
 }
@@ -202,6 +204,7 @@ fun CoroutineScope.launchListeners(
     database: Database,
     consumerProperties: Properties
 ) {
+    log.info("Setter opp listneners")
     val narmesteLederTopic = 0.until(env.applicationThreads).map {
         val kafkaconsumernarmesteLeder = KafkaConsumer<String, String>(consumerProperties)
 
