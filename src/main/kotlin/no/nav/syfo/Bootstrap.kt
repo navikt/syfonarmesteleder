@@ -183,7 +183,6 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
     kafkaconsumer: KafkaConsumer<String, String>,
     database: Database
 ) {
-    log.info("Kjører run blocking mottak av nærmeste ledere")
     while (applicationState.running) {
         val narmesteLedere: List<NarmesteLederDTO> = kafkaconsumer
             .poll(Duration.ofMillis(0))
@@ -204,7 +203,6 @@ fun CoroutineScope.launchListeners(
     database: Database,
     consumerProperties: Properties
 ) {
-    log.info("Setter opp listneners")
     val narmesteLederTopic = 0.until(env.applicationThreads).map {
         val kafkaconsumernarmesteLeder = KafkaConsumer<String, String>(consumerProperties)
 
