@@ -1,9 +1,9 @@
 package no.nav.syfo.kafka
 
-import com.fasterxml.jackson.databind.deser.std.StringDeserializer
 import kafka.server.KafkaConfig
 import no.nav.syfo.Environment
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.StringDeserializer
 import java.util.Properties
 
 fun loadBaseConfig(env: Environment): Properties = Properties().also {
