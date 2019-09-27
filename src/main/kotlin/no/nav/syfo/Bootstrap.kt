@@ -55,6 +55,7 @@ import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
+import no.nav.syfo.kafka.toProducerConfig
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import no.nav.syfo.syfoservice.NarmesteLederDTO
@@ -65,6 +66,7 @@ import no.nav.syfo.syfoservice.toNarmesteLederDAO
 import no.nav.syfo.vault.Vault
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.net.URL
@@ -92,6 +94,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     val applicationState = ApplicationState()
 
     val consumerProperties = loadBaseConfig(env).toConsumerConfig()
+    val producerProperties = loadBaseConfig(env).toProducerConfig()
+    val kafkaProducer = KafkaProducer<String, NarmesteLederDTO>(producerProperties)
 
     val vaultCredentialService = VaultCredentialService()
     val database = Database(env, vaultCredentialService)
@@ -169,6 +173,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     applicationState.initialized = true
 }
 
+const val NARMESTE_LEDER_TOPIC = "helse-narmesteLeder-v1"
+
 fun CoroutineScope.launchListeners(
     env: Environment,
     applicationState: ApplicationState,
@@ -178,7 +184,7 @@ fun CoroutineScope.launchListeners(
     val narmesteLederTopic = 0.until(env.applicationThreads).map {
         val kafkaconsumernarmesteLeder = KafkaConsumer<String, String>(consumerProperties)
 
-        kafkaconsumernarmesteLeder.subscribe(listOf("helse-narmesteLeder-v1"))
+        kafkaconsumernarmesteLeder.subscribe(listOf(NARMESTE_LEDER_TOPIC))
 
         createListener(applicationState) {
             blockingApplicationLogicRecievedNarmesteLeder(applicationState, kafkaconsumernarmesteLeder, database)
