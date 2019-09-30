@@ -9,6 +9,9 @@ import io.ktor.routing.post
 import no.nav.syfo.NARMESTE_LEDER_TOPIC
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.LoggerFactory
+
+private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun Routing.registerSyfoserviceApi(kafkaProducer: KafkaProducer<String, NarmesteLederDTO>) =
     post("/syfoservice/test") {
@@ -18,6 +21,7 @@ fun Routing.registerSyfoserviceApi(kafkaProducer: KafkaProducer<String, Narmeste
     }
 
 fun KafkaProducer<String, NarmesteLederDTO>.leggNarmesteLederPakafka(narmesteLederDTO: NarmesteLederDTO) {
+    log.info("Legger narmesteleder dto med id: ${narmesteLederDTO.narmesteLederId} på topic: $NARMESTE_LEDER_TOPIC")
     send(
         ProducerRecord(
             NARMESTE_LEDER_TOPIC,
