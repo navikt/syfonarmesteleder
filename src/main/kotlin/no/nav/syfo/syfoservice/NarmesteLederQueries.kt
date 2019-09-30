@@ -30,6 +30,7 @@ fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLeder
                     it.setString(6, narmesteLeder.narmesteLederEpost)
                     it.setTimestamp(7, Timestamp.valueOf(narmesteLeder.aktivFom))
                     it.setTimestamp(8, Timestamp.valueOf(narmesteLeder.aktivTom))
+                    it.addBatch()
                 }
             }
 
