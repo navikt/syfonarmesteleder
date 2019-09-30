@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 data class NarmesteLederDTO(
     val narmesteLederId: Long,
-    val bruerkFnr: String,
+    val brukerFnr: String,
     val orgnummer: String,
     val nlfnr: String,
     val nlTelefonnummer: String,
@@ -16,7 +16,7 @@ data class NarmesteLederDTO(
 
 fun NarmesteLederDTO.toForskutteringDAO(): ForskutteringDAO =
     ForskutteringDAO(
-        brukerFnr = this.bruerkFnr,
+        brukerFnr = this.brukerFnr,
         orgnummer = this.orgnummer,
         arbeidsgiverForskutterer = this.agForskutterer,
         sistOppdatert = LocalDateTime.now()
@@ -26,7 +26,7 @@ fun NarmesteLederDTO.toNarmesteLederDAO(): NarmesteLederDAO =
     NarmesteLederDAO(
         narmesteLederId = this.narmesteLederId.toString(),
         orgnummer = this.orgnummer,
-        brukerFnr = this.bruerkFnr,
+        brukerFnr = this.brukerFnr,
         narmesteLederFnr = this.nlfnr,
         narmesteLederTelefonnummer = this.nlTelefonnummer,
         narmesteLederEpost = this.nlEpost,
