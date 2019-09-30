@@ -12,7 +12,6 @@ import io.ktor.server.testing.handleRequest
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toProducerConfig
-import no.nav.syfo.syfoservice.NarmesteLederDTO
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -35,7 +34,7 @@ object SelftestSpek : Spek({
             val env = getEnvironment()
             val baseConfig = loadBaseConfig(env).overrideForTest()
             val producerProperties = baseConfig.toProducerConfig()
-            val kafkaProducer = KafkaProducer<String, NarmesteLederDTO>(producerProperties)
+            val kafkaProducer = KafkaProducer<String, String>(producerProperties)
             application.initRouting(applicationState, env, kafkaProducer)
 
             it("Returns ok on isalive") {

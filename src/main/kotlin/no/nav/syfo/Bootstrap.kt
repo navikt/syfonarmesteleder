@@ -96,7 +96,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
     val consumerProperties = loadBaseConfig(env).toConsumerConfig()
     val producerProperties = loadBaseConfig(env).toProducerConfig()
-    val kafkaProducer = KafkaProducer<String, NarmesteLederDTO>(producerProperties)
+    val kafkaProducer = KafkaProducer<String, String>(producerProperties)
 
     val vaultCredentialService = VaultCredentialService()
     val database = Database(env, vaultCredentialService)
@@ -235,7 +235,7 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
 fun Application.initRouting(
     applicationState: ApplicationState,
     env: Environment,
-    kafkaProducer: KafkaProducer<String, NarmesteLederDTO>
+    kafkaProducer: KafkaProducer<String, String>
 ) {
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
