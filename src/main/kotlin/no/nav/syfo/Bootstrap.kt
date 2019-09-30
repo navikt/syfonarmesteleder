@@ -223,6 +223,7 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
             .poll(Duration.ofMillis(0))
             .map { objectMapper.readValue<NarmesteLederDTO>(it.value()) }
         if (narmesteLedere.isNotEmpty()) {
+            log.info("Plukker liste med ${narmesteLedere.size} nærmeste ledere fra topic.")
             database.leggTilForskutteringer(narmesteLedere.map { it.toForskutteringDAO() })
             database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
             log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
