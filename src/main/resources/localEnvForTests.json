@@ -18,5 +18,5 @@
   },
   "syfonarmestelederDBURL": "https://database.path",
   "vaultPostgresPath": "/vault/postgress/path",
-  "kafkaBootstrapServers": "/bootstrap-url/"
+  "kafkaBootstrapServers": "localhost:9092"
 }

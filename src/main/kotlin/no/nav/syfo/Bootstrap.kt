@@ -61,6 +61,7 @@ import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import no.nav.syfo.syfoservice.NarmesteLederDTO
 import no.nav.syfo.syfoservice.leggTilForskutteringer
 import no.nav.syfo.syfoservice.leggTilNarmesteLedere
+import no.nav.syfo.syfoservice.registerSyfoserviceApi
 import no.nav.syfo.syfoservice.toForskutteringDAO
 import no.nav.syfo.syfoservice.toNarmesteLederDAO
 import no.nav.syfo.vault.Vault
@@ -163,7 +164,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
                 }
             }
         }
-        initRouting(applicationState, env)
+        initRouting(applicationState, env, kafkaProducer)
     }.start(wait = false)
 
     Runtime.getRuntime().addShutdownHook(Thread {
@@ -231,7 +232,11 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
     }
 }
 
-fun Application.initRouting(applicationState: ApplicationState, env: Environment) {
+fun Application.initRouting(
+    applicationState: ApplicationState,
+    env: Environment,
+    kafkaProducer: KafkaProducer<String, NarmesteLederDTO>
+) {
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -274,6 +279,7 @@ fun Application.initRouting(applicationState: ApplicationState, env: Environment
                 applicationState.running
             }
         )
+        registerSyfoserviceApi(kafkaProducer)
         authenticate {
             registrerForskutteringApi(forskutteringsClient)
             registrerNarmesteLederApi(narmesteLederClient)

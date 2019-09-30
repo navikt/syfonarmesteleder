@@ -12,7 +12,13 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
+import io.ktor.http.hostWithPort
 import io.ktor.jackson.jackson
 import io.ktor.request.uri
 import io.ktor.routing.routing
@@ -24,11 +30,16 @@ import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.getEnvironment
 import no.nav.syfo.initRouting
+import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.toProducerConfig
+import no.nav.syfo.syfoservice.NarmesteLederDTO
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.Instant
+import java.util.Properties
 
 const val aktorIdMedForskuttering = 123
 const val aktorIdUtenForskuttering = 999
@@ -54,18 +65,33 @@ object ForskutteringApiSpek : Spek({
                 }
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"JA\"}")
+                with(
+                    handleRequest(
+                        HttpMethod.Get,
+                        "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333"
+                    )
+                ) {
+                    response.content?.shouldEqual("{\"forskuttering\":\"JA\"}")
                 }
             }
             it("Returnerer NEI hvis arbeidsgiver ikke forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"NEI\"}")
+                with(
+                    handleRequest(
+                        HttpMethod.Get,
+                        "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333"
+                    )
+                ) {
+                    response.content?.shouldEqual("{\"forskuttering\":\"NEI\"}")
                 }
             }
             it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"UKJENT\"}")
+                with(
+                    handleRequest(
+                        HttpMethod.Get,
+                        "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333"
+                    )
+                ) {
+                    response.content?.shouldEqual("{\"forskuttering\":\"UKJENT\"}")
                 }
             }
         }
@@ -75,7 +101,16 @@ object ForskutteringApiSpek : Spek({
         with(TestApplicationEngine()) {
             start()
             initTestAuthentication()
-            application.initRouting(applicationState, getEnvironment())
+            fun Properties.overrideForTest(): Properties = apply {
+                remove("security.protocol")
+                remove("sasl.mechanism")
+            }
+
+            val env = getEnvironment()
+            val baseConfig = loadBaseConfig(env).overrideForTest()
+            val producerProperties = baseConfig.toProducerConfig()
+            val kafkaProducer = KafkaProducer<String, NarmesteLederDTO>(producerProperties)
+            application.initRouting(applicationState, env, kafkaProducer)
             application.install(ContentNegotiation) {
                 jackson {
                     registerKotlinModule()
@@ -90,7 +125,12 @@ object ForskutteringApiSpek : Spek({
                 }
             }
             it("Returnerer feilmelding hvis orgnummer mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering")) {
+                with(
+                    handleRequest(
+                        HttpMethod.Get,
+                        "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering"
+                    )
+                ) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
                     response.content shouldNotEqual null
                 }
@@ -106,20 +146,38 @@ val client = HttpClient(MockEngine) {
             when (request.url.fullUrl) {
                 "https://tjenester.nav.no/api/$aktorIdMedForskuttering/forskuttering?orgnummer=333" -> {
                     val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(ByteReadChannel("{\"forskuttering\":\"JA\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                    respond(
+                        ByteReadChannel("{\"forskuttering\":\"JA\"}".toByteArray(Charsets.UTF_8)),
+                        HttpStatusCode.OK,
+                        responseHeaders
+                    )
                 }
-                    "https://tjenester.nav.no/api/$aktorIdUtenForskuttering/forskuttering?orgnummer=333" -> {
-                        val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                        respond(ByteReadChannel("{\"forskuttering\":\"NEI\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                "https://tjenester.nav.no/api/$aktorIdUtenForskuttering/forskuttering?orgnummer=333" -> {
+                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                    respond(
+                        ByteReadChannel("{\"forskuttering\":\"NEI\"}".toByteArray(Charsets.UTF_8)),
+                        HttpStatusCode.OK,
+                        responseHeaders
+                    )
                 }
                 "https://tjenester.nav.no/api/$aktorIdMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
                     val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(ByteReadChannel("{\"forskuttering\":\"UKJENT\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                    respond(
+                        ByteReadChannel("{\"forskuttering\":\"UKJENT\"}".toByteArray(Charsets.UTF_8)),
+                        HttpStatusCode.OK,
+                        responseHeaders
+                    )
                 }
                 "https://login.microsoftonline.com/token" -> {
                     val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     val expiresOn: String = Instant.now().plusSeconds(120L).toString()
-                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\",\"expires_on\":\"$expiresOn\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
+                    respond(
+                        ByteReadChannel(
+                            "{\"access_token\":\"xyz1234\",\"expires_on\":\"$expiresOn\"}".toByteArray(
+                                Charsets.UTF_8
+                            )
+                        ), HttpStatusCode.OK, responseHeaders
+                    )
                 }
                 else -> error("Unhandled ${request.url.fullUrl}")
             }

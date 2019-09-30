@@ -10,10 +10,15 @@ import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.toProducerConfig
+import no.nav.syfo.syfoservice.NarmesteLederDTO
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.util.Properties
 
 object SelftestSpek : Spek({
     val applicationState = ApplicationState()
@@ -22,7 +27,16 @@ object SelftestSpek : Spek({
         with(TestApplicationEngine()) {
             start()
             initTestAuthentication()
-            application.initRouting(applicationState, getEnvironment())
+            fun Properties.overrideForTest(): Properties = apply {
+                remove("security.protocol")
+                remove("sasl.mechanism")
+            }
+
+            val env = getEnvironment()
+            val baseConfig = loadBaseConfig(env).overrideForTest()
+            val producerProperties = baseConfig.toProducerConfig()
+            val kafkaProducer = KafkaProducer<String, NarmesteLederDTO>(producerProperties)
+            application.initRouting(applicationState, env, kafkaProducer)
 
             it("Returns ok on isalive") {
                 applicationState.running = true
