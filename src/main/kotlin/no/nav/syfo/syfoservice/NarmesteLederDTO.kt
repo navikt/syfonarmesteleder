@@ -14,16 +14,16 @@ data class NarmesteLederDTO(
     val agForskutterer: Boolean?
 )
 
-fun NarmesteLederDTO.toForskutteringDAO(): ForskutteringDAO =
-    ForskutteringDAO(
+fun NarmesteLederDTO.toForskuttering(): Forskuttering =
+    Forskuttering(
         brukerFnr = this.brukerFnr,
         orgnummer = this.orgnummer,
         arbeidsgiverForskutterer = this.agForskutterer,
         sistOppdatert = LocalDateTime.now()
     )
 
-fun NarmesteLederDTO.toNarmesteLederDAO(): NarmesteLederDAO =
-    NarmesteLederDAO(
+fun NarmesteLederDTO.toNarmesteLeder(): NarmesteLeder =
+    NarmesteLeder(
         narmesteLederId = this.narmesteLederId.toString(),
         orgnummer = this.orgnummer,
         brukerFnr = this.brukerFnr,

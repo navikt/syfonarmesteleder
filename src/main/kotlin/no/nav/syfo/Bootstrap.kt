@@ -62,8 +62,8 @@ import no.nav.syfo.syfoservice.NarmesteLederDTO
 import no.nav.syfo.syfoservice.leggTilForskutteringer
 import no.nav.syfo.syfoservice.leggTilNarmesteLedere
 import no.nav.syfo.syfoservice.registerSyfoserviceApi
-import no.nav.syfo.syfoservice.toForskutteringDAO
-import no.nav.syfo.syfoservice.toNarmesteLederDAO
+import no.nav.syfo.syfoservice.toForskuttering
+import no.nav.syfo.syfoservice.toNarmesteLeder
 import no.nav.syfo.vault.Vault
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -224,8 +224,8 @@ suspend fun blockingApplicationLogicRecievedNarmesteLeder(
             .map { objectMapper.readValue<NarmesteLederDTO>(it.value()) }
         if (narmesteLedere.isNotEmpty()) {
             log.info("Plukker liste med ${narmesteLedere.size} nærmeste ledere fra topic.")
-            database.leggTilForskutteringer(narmesteLedere.map { it.toForskutteringDAO() })
-            database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLederDAO() })
+            database.leggTilForskutteringer(narmesteLedere.map { it.toForskuttering() })
+            database.leggTilNarmesteLedere(narmesteLedere.map { it.toNarmesteLeder() })
             log.info("Lagret ${narmesteLedere.size} nærmeste ledere")
         }
 

@@ -1,12 +1,9 @@
 package no.nav.syfo.syfoservice
 
 import no.nav.syfo.db.DatabaseInterface
-import org.slf4j.LoggerFactory
 import java.sql.Timestamp
 
-private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
-
-fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLederDAO>) =
+fun DatabaseInterface.leggTilNarmesteLedere(narmesteLeder: List<NarmesteLeder>) =
     connection.use { connection ->
         val statement = connection.prepareStatement(
             """
@@ -23,7 +20,7 @@ fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLeder
         )
 
         statement.use {
-            narmesteLederDAO
+            narmesteLeder
                 .map { narmesteLeder ->
                     it.setString(1, narmesteLeder.narmesteLederId)
                     it.setString(2, narmesteLeder.orgnummer)
@@ -41,7 +38,7 @@ fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLeder
         connection.commit()
     }
 
-fun DatabaseInterface.leggTilForskutteringer(forskutteringDAO: List<ForskutteringDAO>) =
+fun DatabaseInterface.leggTilForskutteringer(forskuttering: List<Forskuttering>) =
     connection.use { connection ->
         val statement = connection.prepareStatement(
             """
@@ -54,7 +51,7 @@ fun DatabaseInterface.leggTilForskutteringer(forskutteringDAO: List<Forskutterin
         )
 
         statement.use {
-            forskutteringDAO
+            forskuttering
                 .filter { forskuttering -> forskuttering.arbeidsgiverForskutterer != null }
                 .map { forskuttering ->
                     it.setString(1, forskuttering.brukerFnr)

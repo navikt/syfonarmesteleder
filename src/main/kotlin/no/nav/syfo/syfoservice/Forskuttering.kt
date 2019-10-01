@@ -2,7 +2,7 @@ package no.nav.syfo.syfoservice
 
 import java.time.LocalDateTime
 
-data class ForskutteringDAO(
+data class Forskuttering(
     val brukerFnr: String,
     val orgnummer: String,
     val arbeidsgiverForskutterer: Boolean?,

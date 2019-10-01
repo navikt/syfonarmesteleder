@@ -2,7 +2,7 @@ package no.nav.syfo.syfoservice
 
 import java.time.LocalDateTime
 
-data class NarmesteLederDAO(
+data class NarmesteLeder(
     val narmesteLederId: String,
     val orgnummer: String,
     val brukerFnr: String,
