@@ -1,7 +1,10 @@
 package no.nav.syfo.syfoservice
 
 import no.nav.syfo.db.DatabaseInterface
+import org.slf4j.LoggerFactory
 import java.sql.Timestamp
+
+private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
 fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLederDAO>) =
     connection.use { connection ->
@@ -19,9 +22,9 @@ fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLeder
             """
         )
 
-        narmesteLederDAO
-            .map { narmesteLeder ->
-                statement.use {
+        statement.use {
+            narmesteLederDAO
+                .map { narmesteLeder ->
                     it.setString(1, narmesteLeder.narmesteLederId)
                     it.setString(2, narmesteLeder.orgnummer)
                     it.setString(3, narmesteLeder.brukerFnr)
@@ -32,9 +35,9 @@ fun DatabaseInterface.leggTilNarmesteLedere(narmesteLederDAO: List<NarmesteLeder
                     it.setTimestamp(8, Timestamp.valueOf(narmesteLeder.aktivTom))
                     it.addBatch()
                 }
-            }
+            it.executeBatch()
+        }
 
-        statement.executeBatch()
         connection.commit()
     }
 
@@ -50,18 +53,18 @@ fun DatabaseInterface.leggTilForskutteringer(forskutteringDAO: List<Forskutterin
             """
         )
 
-        forskutteringDAO
-            .filter { it.arbeidsgiverForskutterer != null }
-            .map { forskuttering ->
-                statement.use {
+        statement.use {
+            forskutteringDAO
+                .filter { forskuttering -> forskuttering.arbeidsgiverForskutterer != null }
+                .map { forskuttering ->
                     it.setString(1, forskuttering.brukerFnr)
                     it.setString(2, forskuttering.orgnummer)
                     it.setBoolean(3, forskuttering.arbeidsgiverForskutterer!!)
                     it.setTimestamp(4, Timestamp.valueOf(forskuttering.sistOppdatert))
                     it.addBatch()
                 }
-            }
 
-        statement.executeBatch()
+            it.executeBatch()
+        }
         connection.commit()
     }
