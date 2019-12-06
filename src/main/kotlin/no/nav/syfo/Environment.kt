@@ -29,6 +29,7 @@ fun getEnvironment(): Environment {
             getEnvVar("JWT_ISSUER"),
             getEnvVar("SYFOSOKNAD_ID"),
             getEnvVar("SYFOVARSEL_ID"),
+            getEnvVar("SYFOOPPFOLGINGSPLANSERVICE_ID"),
             getEnvVar("CLIENT_ID"),
             objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
         )
@@ -49,6 +50,7 @@ data class Environment(
     val jwtIssuer: String,
     val syfosoknadId: String,
     val syfovarselId: String,
+    val syfooppfolgingsplanserviceId: String,
     val clientid: String,
     val credentials: VaultCredentials
 )
