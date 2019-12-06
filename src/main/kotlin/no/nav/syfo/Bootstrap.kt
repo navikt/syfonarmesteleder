@@ -57,7 +57,12 @@ private val log: org.slf4j.Logger = LoggerFactory.getLogger("no.nav.syfo.syfonar
 
 fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = getEnvironment()
-    val authorizedUsers = listOf(env.syfosoknadId, env.syfovarselId, env.arbeidsgivertilgangId)
+    val authorizedUsers = listOf(
+            env.syfosoknadId,
+            env.syfovarselId,
+            env.arbeidsgivertilgangId,
+            env.syfooppfolgingsplanserviceId
+    )
     val applicationState = ApplicationState()
     embeddedServer(Netty, env.applicationPort) {
         val jwkProvider = JwkProviderBuilder(URL(env.jwkKeysUrl))
