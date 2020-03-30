@@ -62,6 +62,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
             env.syfovarselId,
             env.arbeidsgivertilgangId,
             env.syfobrukertilgangId,
+            env.syfomoteadminId,
             env.syfooppfolgingsplanserviceId
     )
     val applicationState = ApplicationState()
