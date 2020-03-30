@@ -30,6 +30,7 @@ fun getEnvironment(): Environment {
             getEnvVar("SYFOSOKNAD_ID"),
             getEnvVar("SYFOVARSEL_ID"),
             getEnvVar("SYFOBRUKERTILGANG_ID"),
+            getEnvVar("SYFOMOTEADMIN_ID"),
             getEnvVar("SYFOOPPFOLGINGSPLANSERVICE_ID"),
             getEnvVar("CLIENT_ID"),
             objectMapper.readValue(File(vaultApplicationPropertiesPath).readText(), VaultCredentials::class.java)
@@ -52,6 +53,7 @@ data class Environment(
     val syfosoknadId: String,
     val syfovarselId: String,
     val syfobrukertilgangId: String,
+    val syfomoteadminId: String,
     val syfooppfolgingsplanserviceId: String,
     val clientid: String,
     val credentials: VaultCredentials
