@@ -68,6 +68,30 @@ class NarmesteLederClient(
             )
         }
     }
+
+    suspend fun hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId: String): List<NarmesteLederRelasjon> {
+        val accessToken = accessTokenClient.hentAccessToken(resourceId)
+        return client.get<List<NarmesteLeder>>("$endpointUrl/sykmeldt/$sykmeldtAktorId/narmesteledere") {
+            accept(ContentType.Application.Json)
+            headers {
+                append("Authorization", "Bearer $accessToken")
+                append("Nav-Consumer-Id", MDC.get("Nav-Consumer-Id"))
+                append("Nav-Callid", MDC.get("Nav-Callid"))
+            }
+        }.map {
+            NarmesteLederRelasjon(
+                    aktorId = it.aktorId,
+                    orgnummer = it.orgnummer,
+                    narmesteLederAktorId = it.nlAktorId,
+                    narmesteLederTelefonnummer = it.nlTelefonnummer,
+                    narmesteLederEpost = it.nlEpost,
+                    aktivFom = it.aktivFom,
+                    arbeidsgiverForskutterer = it.agForskutterer,
+                    skrivetilgang = true,
+                    tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
+            )
+        }
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
