@@ -49,4 +49,20 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
             }
         }
     }
+
+    get("/syfonarmesteleder/sykmeldt/{sykmeldtAktorId}/narmesteledere") {
+        withTraceInterceptor {
+            try {
+                val sykmeldtAktorId: String = call.parameters["sykmeldtAktorId"]?.takeIf { it.isNotEmpty() }
+                    ?: throw IllegalArgumentException("sykmeldtAktorId mangler")
+
+                val narmesteLederRelasjoner =
+                    narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId)
+                call.respond(narmesteLederRelasjoner)
+            } catch (e: IllegalArgumentException) {
+                log.warn("Kan ikke hente nærmeste ledere da aktørid mangler: {}", e.message)
+                call.respond(HttpStatusCode.BadRequest, e.message!!)
+            }
+        }
+    }
 }
