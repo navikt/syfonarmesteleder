@@ -10,6 +10,7 @@
     "jwtIssuer": "https://sts.windows.net/XXXXXXXX/",
     "syfosoknadId": "555555",
     "syfovarselId": "666666",
+    "modiasyforestId": "222222",
     "syfobrukertilgangId": "333333",
     "syfomoteadminId": "77777",
     "syfooppfolgingsplanserviceId": "444444",

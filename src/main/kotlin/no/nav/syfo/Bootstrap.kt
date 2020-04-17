@@ -61,6 +61,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
             env.syfosoknadId,
             env.syfovarselId,
             env.arbeidsgivertilgangId,
+            env.modiasyforestId,
             env.syfobrukertilgangId,
             env.syfomoteadminId,
             env.syfooppfolgingsplanserviceId
