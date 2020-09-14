@@ -61,8 +61,7 @@ data class Environment(
     val clientid: String,
     val syfosmaltinnId: String,
     val credentials: VaultCredentials
-) {
-}
+)
 
 data class VaultCredentials(
     val clientsecret: String
