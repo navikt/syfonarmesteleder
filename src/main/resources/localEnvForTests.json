@@ -14,6 +14,7 @@
     "syfobrukertilgangId": "333333",
     "syfomoteadminId": "77777",
     "syfooppfolgingsplanserviceId": "444444",
+    "syfosmaltinnId": "1234567890101112",
     "clientid": "999999",
     "credentials": {
       "clientsecret": "12345"

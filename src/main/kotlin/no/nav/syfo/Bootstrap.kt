@@ -64,7 +64,8 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
             env.modiasyforestId,
             env.syfobrukertilgangId,
             env.syfomoteadminId,
-            env.syfooppfolgingsplanserviceId
+            env.syfooppfolgingsplanserviceId,
+            env.syfosmaltinnId
     )
     val applicationState = ApplicationState()
     embeddedServer(Netty, env.applicationPort) {
