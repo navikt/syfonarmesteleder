@@ -1,0 +1,72 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: syfonarmesteleder
+  namespace: default
+  labels:
+    team: teamsykefravr
+spec:
+  image: {{ image }}
+  port: 8080
+  liveness:
+    path: /isalive
+    initialDelay: 10
+    timeout: 1
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /isready
+    initialDelay: 60
+    timeout: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 384Mi
+  replicas:
+    min: 2
+    max: 3
+    cpuThresholdPercentage: 90
+  prometheus:
+    enabled: true
+    path: /prometheus
+  ingresses:
+    - "https://syfonarmesteleder.nais.preprod.local"
+  vault:
+    enabled: true
+  webproxy: true
+  env:
+    - name: CLIENT_ID
+      value: a7e7ad0e-4e17-4f19-8aa6-39d73e62fff8
+    - name: SERVICESTRANGLER_ID
+      value: abb15e65-89f6-475e-95e3-be6a31cc64c0
+    - name: ARBEIDSGIVERTILGANG_ID
+      value: 3f567c84-4912-4acf-88ef-9f0dcfc2ae2b
+    - name: AADACCESSTOKEN_URL
+      value: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token
+    - name: AADDISCOVERY_URL
+      value: https://login.microsoftonline.com/navq.onmicrosoft.com/.well-known/openid-configuration
+    - name: SYFOSOKNAD_ID
+      value: 281ba984-745f-48b8-a79c-9444b8688361
+    - name: SYFOVARSEL_ID
+      value: 3f091637-cadb-4d0e-8deb-05a27e776049
+    - name: SYFOBRUKERTILGANG_ID
+      value: e92cacff-fa81-4174-a9d9-e139e38683b9
+    - name: SYFOMOTEADMIN_ID
+      value: 4a100698-9ddc-4441-b42c-ec2ad8825b88
+    - name: SYFOOPPFOLGINGSPLANSERVICE_ID
+      value: 41561812-fdcc-4933-a147-f481a8b9fb18
+    - name: MODIASYFOREST_ID
+      value: 54b2b721-2825-4895-aceb-40cf6103681e
+    - name: SYFOSMALTINN_ID
+      value: 74bce231-869c-4a59-9830-ac479b591bf0
+    - name: JWT_ISSUER
+      value: https://sts.windows.net/966ac572-f5b7-4bbe-aa88-c76419c0f851/
+    - name: SYFONARMESTELEDER_DB_URL
+      value: jdbc:postgresql://b27dbvl008.preprod.local:5432/syfonarmesteleder
+    - name: VAULT_POSTGRES_PATH
+      value: /postgresql/preprod-fss
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
