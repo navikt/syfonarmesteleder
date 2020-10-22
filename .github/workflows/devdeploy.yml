@@ -1,8 +1,9 @@
-name: Deploy to dev and prod
+name: Deploy to dev
 on:
   push:
     branches:
-      - master
+      - '*'
+      - '!master'
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/syfonarmesteleder:${{ github.sha }}
 
@@ -53,9 +54,3 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: nais/naiserator-dev.yaml
-      - name: Deploy to Prod
-        uses: nais/deploy/actions/deploy@master
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: nais/naiserator-prod.yaml
