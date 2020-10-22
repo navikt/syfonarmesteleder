@@ -12,14 +12,20 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
+import io.ktor.http.hostWithPort
 import io.ktor.jackson.jackson
 import io.ktor.request.uri
 import io.ktor.routing.routing
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
-import io.ktor.util.InternalAPI
-import kotlinx.coroutines.io.ByteReadChannel
+import io.ktor.utils.io.ByteReadChannel
+import java.time.Instant
 import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.getEnvironment
@@ -28,13 +34,11 @@ import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.Instant
 
 const val aktorIdMedForskuttering = 123
 const val aktorIdUtenForskuttering = 999
 const val aktorIdMedUkjentForskuttering = 678
 
-@InternalAPI
 object ForskutteringApiSpek : Spek({
     val applicationState = ApplicationState()
     val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
@@ -55,17 +59,17 @@ object ForskutteringApiSpek : Spek({
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"JA\"}")
+                    response.content?.shouldEqual("{\"forskuttering\":\"JA\"}")
                 }
             }
             it("Returnerer NEI hvis arbeidsgiver ikke forskutterer") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"NEI\"}")
+                    response.content?.shouldEqual("{\"forskuttering\":\"NEI\"}")
                 }
             }
             it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
                 with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"UKJENT\"}")
+                    response.content?.shouldEqual("{\"forskuttering\":\"UKJENT\"}")
                 }
             }
         }
@@ -99,7 +103,6 @@ object ForskutteringApiSpek : Spek({
     }
 })
 
-@InternalAPI
 val client = HttpClient(MockEngine) {
     engine {
         addHandler { request ->
@@ -134,7 +137,6 @@ val client = HttpClient(MockEngine) {
     }
 }
 
-@InternalAPI
 val accessTokenClient = AccessTokenClient("https://login.microsoftonline.com/token", "clientid", "clientsecret", client)
 
 private val Url.hostWithPortIfRequired: String get() = if (port == protocol.defaultPort) host else hostWithPort

@@ -6,9 +6,9 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
+import java.time.LocalDate
 import no.nav.syfo.AccessTokenClient
 import org.slf4j.MDC
-import java.time.LocalDate
 
 class NarmesteLederClient(
     private val endpointUrl: String,

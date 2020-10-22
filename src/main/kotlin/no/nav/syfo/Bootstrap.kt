@@ -36,6 +36,10 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
+import java.net.ProxySelector
+import java.net.URL
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
@@ -46,10 +50,6 @@ import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
-import java.net.ProxySelector
-import java.net.URL
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 
