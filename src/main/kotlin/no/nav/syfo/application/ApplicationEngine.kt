@@ -101,7 +101,7 @@ fun createApplicationEngine(
 
         routing {
             registerNaisApi(applicationState)
-            authenticate("jwt") {
+            authenticate {
                 registrerForskutteringApi(forskutteringsClient)
                 registrerNarmesteLederApi(narmesteLederClient)
             }
