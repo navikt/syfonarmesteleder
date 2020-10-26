@@ -9,6 +9,7 @@ val coroutinesVersion = "1.3.3"
 val jacksonVersion = "2.9.8"
 val kluentVersion = "1.49"
 val ktorVersion = "1.3.2"
+val prometheusVersion = "0.6.0"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
 val spekVersion = "2.0.13"
@@ -17,6 +18,8 @@ val flywayVersion = "5.2.4"
 val hikariVersion = "3.3.0"
 val vaultJavaDriveVersion = "3.1.0"
 val postgresEmbeddedVersion = "0.13.1"
+val mockkVersion = "1.10.0"
+val nimbusdsVersion = "7.5.1"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -52,13 +55,18 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.1.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-auth:$ktorVersion")
+    implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
@@ -66,15 +74,14 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.11.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:0.11.1")
-
-    implementation("io.ktor:ktor-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-auth:$ktorVersion")
-    implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("com.bettercloud:vault-java-driver:$vaultJavaDriveVersion")
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("com.nimbusds:nimbus-jose-jwt:$nimbusdsVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
         exclude(group = "org.eclipse.jetty")

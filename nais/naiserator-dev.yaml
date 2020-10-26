@@ -36,10 +36,11 @@ spec:
     - "https://syfonarmesteleder.nais.preprod.local"
   vault:
     enabled: true
+    paths:
+      - kvPath: /azuread/data/dev/creds/syfonarmesteleder
+        mountPath: /secrets/azuread/syfonarmesteleder
   webproxy: true
   env:
-    - name: CLIENT_ID
-      value: a7e7ad0e-4e17-4f19-8aa6-39d73e62fff8
     - name: SERVICESTRANGLER_ID
       value: abb15e65-89f6-475e-95e3-be6a31cc64c0
     - name: ARBEIDSGIVERTILGANG_ID
@@ -64,9 +65,9 @@ spec:
       value: 74bce231-869c-4a59-9830-ac479b591bf0
     - name: JWT_ISSUER
       value: https://sts.windows.net/966ac572-f5b7-4bbe-aa88-c76419c0f851/
+    - name: MOUNT_PATH_VAULT
+      value: /postgresql/preprod-fss
     - name: SYFONARMESTELEDER_DB_URL
       value: jdbc:postgresql://b27dbvl008.preprod.local:5432/syfonarmesteleder
-    - name: VAULT_POSTGRES_PATH
-      value: /postgresql/preprod-fss
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443

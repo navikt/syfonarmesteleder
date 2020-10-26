@@ -1,4 +1,4 @@
-package no.nav.syfo.api
+package no.nav.syfo.application.api
 
 import io.ktor.application.call
 import io.ktor.http.ContentType
@@ -9,20 +9,23 @@ import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import io.prometheus.client.exporter.common.TextFormat.write004
+import no.nav.syfo.application.ApplicationState
 
 fun Routing.registerNaisApi(
-    readynessCheck: () -> Boolean,
-    livenessCheck: () -> Boolean = { true },
+    applicationState: ApplicationState,
+    readynessCheck: () -> Boolean = { applicationState.ready },
+    alivenessCheck: () -> Boolean = { applicationState.alive },
     collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 ) {
-    get("/isalive") {
-        if (livenessCheck()) {
+    get("/is_alive") {
+        if (alivenessCheck()) {
             call.respondText("I'm alive! :)")
         } else {
             call.respondText("I'm dead x_x", status = HttpStatusCode.InternalServerError)
         }
     }
-    get("/isready") {
+    get("/is_ready") {
         if (readynessCheck()) {
             call.respondText("I'm ready! :)")
         } else {
@@ -32,7 +35,7 @@ fun Routing.registerNaisApi(
     get("/prometheus") {
         val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: setOf()
         call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-            TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
+            write004(this, collectorRegistry.filteredMetricFamilySamples(names))
         }
     }
 }
