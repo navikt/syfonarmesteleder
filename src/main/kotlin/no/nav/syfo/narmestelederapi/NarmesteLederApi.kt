@@ -21,7 +21,6 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
                 log.info("Mottatt forespørsel om nærmeste leder-relasjoner for leder {}", narmesteLederAktorId)
 
                 call.respond(narmesteLederClient.hentNarmesteLederFraSyfoserviceStrangler(narmesteLederAktorId))
-
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste leder: {}", e.message)
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Kan ikke hente nærmeste leder")

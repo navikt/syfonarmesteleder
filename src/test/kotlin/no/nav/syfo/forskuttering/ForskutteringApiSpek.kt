@@ -1,151 +1,199 @@
 package no.nav.syfo.forskuttering
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.auth.authentication
-import io.ktor.auth.jwt.jwt
+import io.ktor.auth.authenticate
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
-import io.ktor.http.*
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
-import io.ktor.request.uri
+import io.ktor.response.respond
+import io.ktor.routing.get
 import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
-import io.ktor.util.InternalAPI
-import kotlinx.coroutines.io.ByteReadChannel
+import io.mockk.coEvery
+import io.mockk.mockk
+import java.net.ServerSocket
+import java.util.concurrent.TimeUnit
 import no.nav.syfo.AccessTokenClient
-import no.nav.syfo.ApplicationState
-import no.nav.syfo.getEnvironment
-import no.nav.syfo.initRouting
+import no.nav.syfo.testutils.generateJWT
+import no.nav.syfo.testutils.setUpAuth
+import no.nav.syfo.testutils.setUpTestApplication
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.Instant
 
 const val aktorIdMedForskuttering = 123
 const val aktorIdUtenForskuttering = 999
 const val aktorIdMedUkjentForskuttering = 678
 
-@InternalAPI
 object ForskutteringApiSpek : Spek({
-    val applicationState = ApplicationState()
-    val forskutteringsClient = ForskutteringsClient("https://tjenester.nav.no", "12345", accessTokenClient, client)
+    val accessTokenClientMock = mockk<AccessTokenClient>()
+    val httpClient = HttpClient(Apache) {
+        install(JsonFeature) {
+            serializer = JacksonSerializer {
+                registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
+        }
+    }
+
+    val mockHttpServerPort = ServerSocket(0).use { it.localPort }
+    val mockHttpServerUrl = "http://localhost:$mockHttpServerPort"
+    val mockServer = embeddedServer(Netty, mockHttpServerPort) {
+        install(ContentNegotiation) {
+            jackson {
+                registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
+        }
+        routing {
+            get("/api/$aktorIdMedForskuttering/forskuttering") {
+                call.respond(HttpStatusCode.OK, ForskutteringRespons(Forskuttering.JA))
+            }
+            get("/api/$aktorIdUtenForskuttering/forskuttering") {
+                call.respond(HttpStatusCode.OK, ForskutteringRespons(Forskuttering.NEI))
+            }
+            get("/api/$aktorIdMedUkjentForskuttering/forskuttering") {
+                call.respond(HttpStatusCode.OK, ForskutteringRespons(Forskuttering.UKJENT))
+            }
+        }
+    }.start()
+
+    val forskutteringsClient = ForskutteringsClient(mockHttpServerUrl, "12345", accessTokenClientMock, httpClient)
+
+    afterGroup {
+        mockServer.stop(TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
+    }
+
+    beforeEachTest {
+        coEvery { accessTokenClientMock.hentAccessToken(any()) } returns "token"
+    }
 
     describe("Forskutteringsapi returnerer gyldig svar for gyldig request") {
         with(TestApplicationEngine()) {
-            start()
-            initTestAuthentication()
+            setUpTestApplication()
+            val env = setUpAuth()
             application.routing {
-                registrerForskutteringApi(forskutteringsClient)
-            }
-            application.install(ContentNegotiation) {
-                jackson {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                authenticate {
+                    registrerForskutteringApi(forskutteringsClient)
                 }
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"JA\"}")
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("syfosmaltinn",
+                            "syfonarmesteleder",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
+                    response.content?.shouldEqual("{\"forskuttering\":\"JA\"}")
                 }
             }
             it("Returnerer NEI hvis arbeidsgiver ikke forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"NEI\"}")
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("syfosmaltinn",
+                            "syfonarmesteleder",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
+                    response.content?.shouldEqual("{\"forskuttering\":\"NEI\"}")
                 }
             }
             it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333")) {
-                    response.content?.shouldEqual( "{\"forskuttering\":\"UKJENT\"}")
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("syfosmaltinn",
+                            "syfonarmesteleder",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
+                    response.content?.shouldEqual("{\"forskuttering\":\"UKJENT\"}")
                 }
             }
         }
     }
 
-    describe("Forskutteringsapi returnerer BadRequest for ugyldig request") {
+    describe("Feilhåndtering forskutteringsapi") {
         with(TestApplicationEngine()) {
-            start()
-            initTestAuthentication()
-            application.initRouting(applicationState, getEnvironment())
-            application.install(ContentNegotiation) {
-                jackson {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            setUpTestApplication()
+            val env = setUpAuth()
+            application.routing {
+                authenticate {
+                    registrerForskutteringApi(forskutteringsClient)
                 }
             }
             it("Returnerer feilmelding hvis aktørid mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnummer=333")) {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnummer=333") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("syfosmaltinn",
+                            "syfonarmesteleder",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
                     response.content shouldNotEqual null
                 }
             }
             it("Returnerer feilmelding hvis orgnummer mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering")) {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("syfosmaltinn",
+                            "syfonarmesteleder",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
                     response.status() shouldEqual HttpStatusCode.BadRequest
                     response.content shouldNotEqual null
+                }
+            }
+            it("Feil audience gir feilmelding") {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("syfosmaltinn",
+                            "feil",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
+                    response.status() shouldEqual HttpStatusCode.Unauthorized
+                }
+            }
+            it("Konsument som ikke har tilgang gir feilmelding") {
+                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
+                    addHeader(HttpHeaders.Authorization, "Bearer ${
+                        generateJWT("ikketilgang",
+                            "syfonarmesteleder",
+                            subject = "123",
+                            issuer = env.jwtIssuer)
+                    }")
+                }) {
+                    response.status() shouldEqual HttpStatusCode.Unauthorized
                 }
             }
         }
     }
 })
-
-@InternalAPI
-val client = HttpClient(MockEngine) {
-    engine {
-        addHandler { request ->
-            when (request.url.fullUrl) {
-                "https://tjenester.nav.no/api/$aktorIdMedForskuttering/forskuttering?orgnummer=333" -> {
-                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(ByteReadChannel("{\"forskuttering\":\"JA\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
-                }
-                    "https://tjenester.nav.no/api/$aktorIdUtenForskuttering/forskuttering?orgnummer=333" -> {
-                        val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                        respond(ByteReadChannel("{\"forskuttering\":\"NEI\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
-                }
-                "https://tjenester.nav.no/api/$aktorIdMedUkjentForskuttering/forskuttering?orgnummer=333" -> {
-                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(ByteReadChannel("{\"forskuttering\":\"UKJENT\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
-                }
-                "https://login.microsoftonline.com/token" -> {
-                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val expiresOn: String = Instant.now().plusSeconds(120L).toString()
-                    respond(ByteReadChannel("{\"access_token\":\"xyz1234\",\"expires_on\":\"$expiresOn\"}".toByteArray(Charsets.UTF_8)), HttpStatusCode.OK, responseHeaders)
-                }
-                else -> error("Unhandled ${request.url.fullUrl}")
-            }
-        }
-    }
-    install(JsonFeature) {
-        serializer = JacksonSerializer {
-            registerKotlinModule()
-            registerModule(JavaTimeModule())
-            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        }
-    }
-}
-
-@InternalAPI
-val accessTokenClient = AccessTokenClient("https://login.microsoftonline.com/token", "clientid", "clientsecret", client)
-
-private val Url.hostWithPortIfRequired: String get() = if (port == protocol.defaultPort) host else hostWithPort
-private val Url.fullUrl: String get() = "${protocol.name}://$hostWithPortIfRequired$fullPath"
-
-private fun TestApplicationEngine.initTestAuthentication() {
-    application.authentication {
-        jwt {
-            skipWhen { call ->
-                call.request.uri.contains("arbeidsgiverForskutterer")
-            }
-        }
-    }
-}

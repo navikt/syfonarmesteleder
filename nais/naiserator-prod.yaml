@@ -10,13 +10,13 @@ spec:
   port: 8080
   team: teamsykefravr
   liveness:
-    path: /isalive
+    path: /is_alive
     initialDelay: 10
     timeout: 1
     periodSeconds: 10
     failureThreshold: 3
   readiness:
-    path: /isready
+    path: /is_ready
     initialDelay: 10
     timeout: 1
   resources:
@@ -37,10 +37,11 @@ spec:
     - "https://syfonarmesteleder.nais.adeo.no"
   vault:
     enabled: true
+    paths:
+      - kvPath: /azuread/data/prod/creds/syfonarmesteleder
+        mountPath: /secrets/azuread/syfonarmesteleder
   webproxy: true
   env:
-    - name: CLIENT_ID
-      value: ccf8c36f-27e6-4e76-8250-9a49939df7ef
     - name: SERVICESTRANGLER_ID
       value: 642cea5c-35d1-4744-806f-03104dbdf4cc
     - name: ARBEIDSGIVERTILGANG_ID
@@ -65,9 +66,9 @@ spec:
       value: ffdc358b-b97c-470e-a0c8-bf147b5e8561
     - name: JWT_ISSUER
       value: https://sts.windows.net/62366534-1ec3-4962-8869-9b5535279d0b/
+    - name: MOUNT_PATH_VAULT
+      value: /postgresql/prod-fss
     - name: SYFONARMESTELEDER_DB_URL
       value: jdbc:postgresql://A01DBVL010.adeo.no:5432/syfonarmesteleder
-    - name: VAULT_POSTGRES_PATH
-      value: /postgresql/prod-fss
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
