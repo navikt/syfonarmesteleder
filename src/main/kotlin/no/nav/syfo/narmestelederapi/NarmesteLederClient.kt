@@ -33,6 +33,7 @@ class NarmesteLederClient(
                 narmesteLederTelefonnummer = it.nlTelefonnummer,
                 narmesteLederEpost = it.nlEpost,
                 aktivFom = it.aktivFom,
+                aktivTom = it.aktivTom,
                 arbeidsgiverForskutterer = it.agForskutterer,
                 skrivetilgang = true,
                 tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
@@ -62,6 +63,7 @@ class NarmesteLederClient(
                 narmesteLederTelefonnummer = it.nlTelefonnummer,
                 narmesteLederEpost = it.nlEpost,
                 aktivFom = it.aktivFom,
+                aktivTom = it.aktivTom,
                 arbeidsgiverForskutterer = it.agForskutterer,
                 skrivetilgang = true,
                 tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
@@ -86,6 +88,7 @@ class NarmesteLederClient(
                     narmesteLederTelefonnummer = it.nlTelefonnummer,
                     narmesteLederEpost = it.nlEpost,
                     aktivFom = it.aktivFom,
+                    aktivTom = it.aktivTom,
                     arbeidsgiverForskutterer = it.agForskutterer,
                     skrivetilgang = true,
                     tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
@@ -105,5 +108,6 @@ data class NarmesteLeder(
     val nlTelefonnummer: String?,
     val nlEpost: String?,
     val aktivFom: LocalDate,
+    val aktivTom: LocalDate?,
     val agForskutterer: Boolean?
 )
