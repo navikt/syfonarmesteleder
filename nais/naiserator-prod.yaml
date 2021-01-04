@@ -27,8 +27,8 @@ spec:
       cpu: 1024m
       memory: 1Gi
   replicas:
-    min: 3
-    max: 3
+    min: 2
+    max: 4
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
