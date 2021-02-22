@@ -38,6 +38,8 @@ spec:
   vault:
     enabled: true
     paths:
+      - kvPath: /apikey/appdynamics/prod
+        mountPath: /var/run/secrets/nais.io/vault
       - kvPath: /azuread/data/prod/creds/syfonarmesteleder
         mountPath: /secrets/azuread/syfonarmesteleder
   webproxy: true
