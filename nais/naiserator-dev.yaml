@@ -10,7 +10,7 @@ spec:
   port: 8080
   liveness:
     path: /is_alive
-    initialDelay: 10
+    initialDelay: 30
     timeout: 1
     periodSeconds: 10
     failureThreshold: 3
@@ -37,6 +37,8 @@ spec:
   vault:
     enabled: true
     paths:
+      - kvPath: /apikey/appdynamics/dev
+        mountPath: /var/run/secrets/nais.io/vault
       - kvPath: /azuread/data/dev/creds/syfonarmesteleder
         mountPath: /secrets/azuread/syfonarmesteleder
   webproxy: true
