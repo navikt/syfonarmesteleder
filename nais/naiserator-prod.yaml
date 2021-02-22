@@ -11,7 +11,7 @@ spec:
   team: teamsykefravr
   liveness:
     path: /is_alive
-    initialDelay: 10
+    initialDelay: 30
     timeout: 1
     periodSeconds: 10
     failureThreshold: 3
