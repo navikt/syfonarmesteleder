@@ -25,16 +25,16 @@ import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.server.testing.handleRequest
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.net.ServerSocket
-import java.util.concurrent.TimeUnit
 import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.testutils.generateJWT
 import no.nav.syfo.testutils.setUpAuth
 import no.nav.syfo.testutils.setUpTestApplication
-import org.amshove.kluent.shouldEqual
-import org.amshove.kluent.shouldNotEqual
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.net.ServerSocket
+import java.util.concurrent.TimeUnit
 
 const val aktorIdMedForskuttering = 123
 const val aktorIdUtenForskuttering = 999
@@ -97,39 +97,60 @@ object ForskutteringApiSpek : Spek({
                 }
             }
             it("Returnerer JA hvis arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("syfosmaltinn",
-                            "syfonarmesteleder",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.content?.shouldEqual("{\"forskuttering\":\"JA\"}")
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering&orgnummer=333") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "syfosmaltinn",
+                                "syfonarmesteleder",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.content?.shouldBeEqualTo("{\"forskuttering\":\"JA\"}")
                 }
             }
             it("Returnerer NEI hvis arbeidsgiver ikke forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("syfosmaltinn",
-                            "syfonarmesteleder",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.content?.shouldEqual("{\"forskuttering\":\"NEI\"}")
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdUtenForskuttering&orgnummer=333") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "syfosmaltinn",
+                                "syfonarmesteleder",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.content?.shouldBeEqualTo("{\"forskuttering\":\"NEI\"}")
                 }
             }
             it("Returnerer UKJENT hvis vi ikke vet om arbeidsgiver forskutterer") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("syfosmaltinn",
-                            "syfonarmesteleder",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.content?.shouldEqual("{\"forskuttering\":\"UKJENT\"}")
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "syfosmaltinn",
+                                "syfonarmesteleder",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.content?.shouldBeEqualTo("{\"forskuttering\":\"UKJENT\"}")
                 }
             }
         }
@@ -145,53 +166,81 @@ object ForskutteringApiSpek : Spek({
                 }
             }
             it("Returnerer feilmelding hvis aktørid mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnummer=333") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("syfosmaltinn",
-                            "syfonarmesteleder",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.status() shouldEqual HttpStatusCode.BadRequest
-                    response.content shouldNotEqual null
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?orgnummer=333") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "syfosmaltinn",
+                                "syfonarmesteleder",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.status() shouldBeEqualTo HttpStatusCode.BadRequest
+                    response.content shouldNotBeEqualTo null
                 }
             }
             it("Returnerer feilmelding hvis orgnummer mangler") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("syfosmaltinn",
-                            "syfonarmesteleder",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.status() shouldEqual HttpStatusCode.BadRequest
-                    response.content shouldNotEqual null
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedForskuttering") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "syfosmaltinn",
+                                "syfonarmesteleder",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.status() shouldBeEqualTo HttpStatusCode.BadRequest
+                    response.content shouldNotBeEqualTo null
                 }
             }
             it("Feil audience gir feilmelding") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("syfosmaltinn",
-                            "feil",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.status() shouldEqual HttpStatusCode.Unauthorized
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "syfosmaltinn",
+                                "feil",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.status() shouldBeEqualTo HttpStatusCode.Unauthorized
                 }
             }
             it("Konsument som ikke har tilgang gir feilmelding") {
-                with(handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
-                    addHeader(HttpHeaders.Authorization, "Bearer ${
-                        generateJWT("ikketilgang",
-                            "syfonarmesteleder",
-                            subject = "123",
-                            issuer = env.jwtIssuer)
-                    }")
-                }) {
-                    response.status() shouldEqual HttpStatusCode.Unauthorized
+                with(
+                    handleRequest(HttpMethod.Get, "/syfonarmesteleder/arbeidsgiverForskutterer?aktorId=$aktorIdMedUkjentForskuttering&orgnummer=333") {
+                        addHeader(
+                            HttpHeaders.Authorization,
+                            "Bearer ${
+                            generateJWT(
+                                "ikketilgang",
+                                "syfonarmesteleder",
+                                subject = "123",
+                                issuer = env.jwtIssuer
+                            )
+                            }"
+                        )
+                    }
+                ) {
+                    response.status() shouldBeEqualTo HttpStatusCode.Unauthorized
                 }
             }
         }
