@@ -27,6 +27,8 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
+import java.net.ProxySelector
+import java.util.UUID
 import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
@@ -38,8 +40,6 @@ import no.nav.syfo.log
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
-import java.net.ProxySelector
-import java.util.UUID
 
 @KtorExperimentalAPI
 fun createApplicationEngine(

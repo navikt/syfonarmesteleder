@@ -5,20 +5,20 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.4.2"
-val jacksonVersion = "2.12.0"
-val kluentVersion = "1.61"
-val ktorVersion = "1.5.1"
-val prometheusVersion = "0.9.0"
+val coroutinesVersion = "1.3.9"
+val jacksonVersion = "2.9.8"
+val kluentVersion = "1.51"
+val ktorVersion = "1.4.1"
+val prometheusVersion = "0.6.0"
 val logbackVersion = "1.2.3"
-val logstashEncoderVersion = "6.5"
+val logstashEncoderVersion = "6.1"
 val spekVersion = "2.0.13"
 val postgresVersion = "42.2.5"
 val flywayVersion = "5.2.4"
 val hikariVersion = "3.3.0"
 val vaultJavaDriveVersion = "3.1.0"
 val postgresEmbeddedVersion = "0.13.1"
-val mockkVersion = "1.10.3"
+val mockkVersion = "1.10.0"
 val nimbusdsVersion = "7.5.1"
 
 tasks.withType<Jar> {
@@ -26,10 +26,10 @@ tasks.withType<Jar> {
 }
 
 plugins {
-    id("org.jmailen.kotlinter") version "3.3.0"
-    kotlin("jvm") version "1.4.21"
-    id("com.diffplug.spotless") version "5.8.2"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("org.jmailen.kotlinter") version "2.2.0"
+    kotlin("jvm") version "1.3.72"
+    id("com.diffplug.gradle.spotless") version "3.23.1"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     jacoco
 }
 
