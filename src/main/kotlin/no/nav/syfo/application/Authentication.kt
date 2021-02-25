@@ -40,7 +40,7 @@ fun harTilgang(credentials: JWTCredential, env: Environment, clientId: String): 
         env.syfosmaltinnId
     )
     val appid: String = credentials.payload.getClaim("appid").asString()
-    log.info("authorization attempt for $appid")
+    log.debug("authorization attempt for $appid")
     return appid in authorizedUsers && credentials.payload.audience.contains(clientId)
 }
 
