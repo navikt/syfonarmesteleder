@@ -6,9 +6,9 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
-import java.time.LocalDate
 import no.nav.syfo.AccessTokenClient
 import org.slf4j.MDC
+import java.time.LocalDate
 
 class NarmesteLederClient(
     private val endpointUrl: String,
@@ -82,16 +82,16 @@ class NarmesteLederClient(
             }
         }.map {
             NarmesteLederRelasjon(
-                    aktorId = it.aktorId,
-                    orgnummer = it.orgnummer,
-                    narmesteLederAktorId = it.nlAktorId,
-                    narmesteLederTelefonnummer = it.nlTelefonnummer,
-                    narmesteLederEpost = it.nlEpost,
-                    aktivFom = it.aktivFom,
-                    aktivTom = it.aktivTom,
-                    arbeidsgiverForskutterer = it.agForskutterer,
-                    skrivetilgang = true,
-                    tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
+                aktorId = it.aktorId,
+                orgnummer = it.orgnummer,
+                narmesteLederAktorId = it.nlAktorId,
+                narmesteLederTelefonnummer = it.nlTelefonnummer,
+                narmesteLederEpost = it.nlEpost,
+                aktivFom = it.aktivFom,
+                aktivTom = it.aktivTom,
+                arbeidsgiverForskutterer = it.agForskutterer,
+                skrivetilgang = true,
+                tilganger = listOf(Tilgang.SYKMELDING, Tilgang.SYKEPENGESOKNAD, Tilgang.MOTE, Tilgang.OPPFOLGINGSPLAN)
             )
         }
     }

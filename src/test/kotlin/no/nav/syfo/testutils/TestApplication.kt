@@ -15,12 +15,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.response.respond
 import io.ktor.server.testing.TestApplicationEngine
-import java.nio.file.Paths
-import java.util.UUID
 import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
 import no.nav.syfo.application.setupAuth
 import no.nav.syfo.log
+import java.nio.file.Paths
+import java.util.UUID
 
 fun TestApplicationEngine.setUpTestApplication() {
     start(true)
