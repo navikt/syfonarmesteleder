@@ -17,18 +17,18 @@ spec:
     failureThreshold: 3
   readiness:
     path: /is_ready
-    initialDelay: 10
+    initialDelay: 60
     timeout: 1
   resources:
     limits:
-      cpu: 2048m
+      cpu: 2560m
       memory: 1Gi
     requests:
-      cpu: 1024m
+      cpu: 2048m
       memory: 1Gi
   replicas:
-    min: 2
-    max: 4
+    min: 3
+    max: 6
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
