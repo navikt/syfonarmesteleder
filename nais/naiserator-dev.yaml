@@ -11,13 +11,14 @@ spec:
   liveness:
     path: /is_alive
     initialDelay: 30
-    timeout: 1
-    periodSeconds: 10
-    failureThreshold: 3
+    timeout: 5
+    periodSeconds: 5
+    failureThreshold: 30
   readiness:
     path: /is_ready
     initialDelay: 60
-    timeout: 1
+    periodSeconds: 5
+    timeout: 5
   resources:
     limits:
       cpu: 500m
