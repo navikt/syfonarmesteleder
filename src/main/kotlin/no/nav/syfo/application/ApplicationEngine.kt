@@ -16,7 +16,6 @@ import io.ktor.client.engine.apache.ApacheEngineConfig
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.CallId
-import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.http.HttpHeaders
@@ -39,7 +38,6 @@ import no.nav.syfo.log
 import no.nav.syfo.narmestelederapi.NarmesteLederClient
 import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
-import org.slf4j.event.Level
 import java.net.ProxySelector
 import java.util.UUID
 
@@ -64,9 +62,6 @@ fun createApplicationEngine(
             generate { UUID.randomUUID().toString() }
             verify { callId: String -> callId.isNotEmpty() }
             header(HttpHeaders.XCorrelationId)
-        }
-        install(CallLogging) {
-            level = Level.INFO
         }
         install(StatusPages) {
             exception<Throwable> { cause ->
