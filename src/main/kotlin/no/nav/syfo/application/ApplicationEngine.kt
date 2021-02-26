@@ -32,6 +32,7 @@ import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
 import no.nav.syfo.application.api.registerNaisApi
 import no.nav.syfo.application.metrics.monitorHttpRequests
+import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.log
@@ -91,6 +92,12 @@ fun createApplicationEngine(
 
         val httpClientWithProxy = HttpClient(Apache, proxyConfig)
         val httpClient = HttpClient(Apache, config)
+
+        val stsOidcClient = StsOidcClient(
+            username = vaultSecrets.serviceuserUsername,
+            password = vaultSecrets.serviceuserPassword,
+            stsUrl = env.stsUrl
+        )
 
         val accessTokenClient =
             AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
