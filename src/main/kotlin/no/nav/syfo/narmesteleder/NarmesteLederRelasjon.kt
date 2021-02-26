@@ -1,4 +1,4 @@
-package no.nav.syfo.narmestelederapi
+package no.nav.syfo.narmesteleder
 
 import java.time.LocalDate
 
@@ -12,7 +12,8 @@ data class NarmesteLederRelasjon(
     val aktivTom: LocalDate?,
     val arbeidsgiverForskutterer: Boolean?,
     val skrivetilgang: Boolean,
-    val tilganger: List<Tilgang>
+    val tilganger: List<Tilgang>,
+    val navn: String? = null
 )
 
 enum class Tilgang {

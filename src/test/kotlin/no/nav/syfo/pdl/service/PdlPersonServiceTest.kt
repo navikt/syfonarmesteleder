@@ -24,7 +24,6 @@ object PdlPersonServiceTest : Spek({
     val stsOidcClient = mockkClass(StsOidcClient::class)
     val pdlPersonService = PdlPersonService(pdlClient, stsOidcClient)
 
-    val token = "token"
     val callId = "callid"
     val aktorIdLeder1 = "123"
     val aktorIdLeder2 = "456"
@@ -36,7 +35,7 @@ object PdlPersonServiceTest : Spek({
 
     describe("Test av PdlPersonService") {
         it("Henter navn for to ledere") {
-            coEvery { pdlClient.getPersoner(any(), any(), any()) } returns GetPersonResponse(
+            coEvery { pdlClient.getPersoner(any(), any()) } returns GetPersonResponse(
                 ResponseData(
                     hentPersonBolk = listOf(
                         HentPersonBolk(aktorIdLeder1, Person(listOf(no.nav.syfo.pdl.client.model.Navn("fornavn", null, "etternavn"))), "ok"),
@@ -47,14 +46,14 @@ object PdlPersonServiceTest : Spek({
             )
 
             runBlocking {
-                val personer = pdlPersonService.getPersonnavn(listOf(aktorIdLeder1, aktorIdLeder2), token, callId)
+                val personer = pdlPersonService.getPersonnavn(listOf(aktorIdLeder1, aktorIdLeder2), callId)
 
                 personer[aktorIdLeder1] shouldBeEqualTo Navn("fornavn", null, "etternavn")
                 personer[aktorIdLeder2] shouldBeEqualTo Navn("fornavn2", "mellomnavn", "etternavn2")
             }
         }
         it("Navn er null hvis aktør ikke finnes i PDL") {
-            coEvery { pdlClient.getPersoner(any(), any(), any()) } returns GetPersonResponse(
+            coEvery { pdlClient.getPersoner(any(), any()) } returns GetPersonResponse(
                 ResponseData(
                     hentPersonBolk = listOf(
                         HentPersonBolk(aktorIdLeder1, null, "not_found"),
@@ -65,18 +64,18 @@ object PdlPersonServiceTest : Spek({
             )
 
             runBlocking {
-                val personer = pdlPersonService.getPersonnavn(listOf(aktorIdLeder1, aktorIdLeder2), token, callId)
+                val personer = pdlPersonService.getPersonnavn(listOf(aktorIdLeder1, aktorIdLeder2), callId)
 
                 personer[aktorIdLeder1] shouldBeEqualTo null
                 personer[aktorIdLeder2] shouldBeEqualTo Navn("fornavn", null, "etternavn")
             }
         }
         it("Skal feile når ingen personer finnes") {
-            coEvery { pdlClient.getPersoner(any(), any(), any()) } returns GetPersonResponse(ResponseData(hentPersonBolk = emptyList()), errors = null)
+            coEvery { pdlClient.getPersoner(any(), any()) } returns GetPersonResponse(ResponseData(hentPersonBolk = emptyList()), errors = null)
 
             assertFailsWith<IllegalStateException> {
                 runBlocking {
-                    pdlPersonService.getPersonnavn(listOf("fnrPasient", "fnrLege"), token, callId)
+                    pdlPersonService.getPersonnavn(listOf("fnrPasient", "fnrLege"), callId)
                 }
             }
         }

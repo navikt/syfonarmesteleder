@@ -9,9 +9,9 @@ import no.nav.syfo.pdl.model.Navn
 @KtorExperimentalAPI
 class PdlPersonService(private val pdlClient: PdlClient, private val stsOidcClient: StsOidcClient) {
 
-    suspend fun getPersonnavn(aktorIds: List<String>, userToken: String, callId: String): Map<String, Navn?> {
+    suspend fun getPersonnavn(aktorIds: List<String>, callId: String): Map<String, Navn?> {
         val stsToken = stsOidcClient.oidcToken().access_token
-        val pdlResponse = pdlClient.getPersoner(aktorIds, userToken, stsToken)
+        val pdlResponse = pdlClient.getPersoner(aktorIds, stsToken)
 
         if (pdlResponse.errors != null) {
             pdlResponse.errors.forEach {
