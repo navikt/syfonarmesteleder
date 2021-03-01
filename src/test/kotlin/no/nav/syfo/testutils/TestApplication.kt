@@ -61,13 +61,15 @@ fun TestApplicationEngine.setUpAuth(): Environment {
         syfooppfolgingsplanserviceId = "oppfolgingsplanservice",
         syfosmaltinnId = "syfosmaltinn",
         syfonarmestelederDBURL = "",
-        mountPathVault = ""
+        mountPathVault = "",
+        pdlGraphqlPath = "graphql",
+        stsUrl = "http://sts"
     )
 
     val path = "src/test/resources/jwkset.json"
     val uri = Paths.get(path).toUri().toURL()
     val jwkProvider = JwkProviderBuilder(uri).build()
-    val vaultSecrets = VaultSecrets("syfonarmesteleder", "")
+    val vaultSecrets = VaultSecrets("syfonarmesteleder", "", "srvsyfonarmesteleder", "pwd")
 
     application.setupAuth(jwkProvider, env, vaultSecrets)
     return env

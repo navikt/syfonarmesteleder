@@ -42,6 +42,8 @@ spec:
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: /azuread/data/dev/creds/syfonarmesteleder
         mountPath: /secrets/azuread/syfonarmesteleder
+      - kvPath: serviceuser/data/dev/srvsyfonarmesteleder
+        mountPath: /secrets/serviceuser
   webproxy: true
   env:
     - name: SERVICESTRANGLER_ID
@@ -74,3 +76,5 @@ spec:
       value: jdbc:postgresql://b27dbvl008.preprod.local:5432/syfonarmesteleder
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
+    - name: PDL_GRAPHQL_PATH
+      value: https://pdl-api.nais.preprod.local/graphql

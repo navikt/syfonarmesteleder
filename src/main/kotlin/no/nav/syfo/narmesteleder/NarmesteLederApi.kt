@@ -1,17 +1,20 @@
-package no.nav.syfo.narmestelederapi
+package no.nav.syfo.narmesteleder
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
+import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.traceinterceptor.withTraceInterceptor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfonarmesteleder")
 
-fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
+@KtorExperimentalAPI
+fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient, utvidetNarmesteLederService: UtvidetNarmesteLederService) {
     get("/syfonarmesteleder/narmesteLeder/{narmesteLederAktorId}") {
         withTraceInterceptor {
             try {
@@ -55,9 +58,14 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient) {
                 val sykmeldtAktorId: String = call.parameters["sykmeldtAktorId"]?.takeIf { it.isNotEmpty() }
                     ?: throw IllegalArgumentException("sykmeldtAktorId mangler")
 
-                val narmesteLederRelasjoner =
-                    narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId)
-                call.respond(narmesteLederRelasjoner)
+                if (call.request.queryParameters["utvidet"] == "ja") {
+                    val callId = MDC.get("Nav-Callid")
+                    call.respond(utvidetNarmesteLederService.hentNarmesteledereMedNavn(sykmeldtAktorId = sykmeldtAktorId, callId = callId))
+                } else {
+                    val narmesteLederRelasjoner =
+                        narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId)
+                    call.respond(narmesteLederRelasjoner)
+                }
             } catch (e: IllegalArgumentException) {
                 log.warn("Kan ikke hente nærmeste ledere da aktørid mangler: {}", e.message)
                 call.respond(HttpStatusCode.BadRequest, e.message!!)

@@ -32,11 +32,15 @@ import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
 import no.nav.syfo.application.api.registerNaisApi
 import no.nav.syfo.application.metrics.monitorHttpRequests
+import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
 import no.nav.syfo.log
-import no.nav.syfo.narmestelederapi.NarmesteLederClient
-import no.nav.syfo.narmestelederapi.registrerNarmesteLederApi
+import no.nav.syfo.narmesteleder.NarmesteLederClient
+import no.nav.syfo.narmesteleder.UtvidetNarmesteLederService
+import no.nav.syfo.narmesteleder.registrerNarmesteLederApi
+import no.nav.syfo.pdl.client.PdlClient
+import no.nav.syfo.pdl.service.PdlPersonService
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 import java.util.UUID
@@ -92,18 +96,31 @@ fun createApplicationEngine(
         val httpClientWithProxy = HttpClient(Apache, proxyConfig)
         val httpClient = HttpClient(Apache, config)
 
+        val stsOidcClient = StsOidcClient(
+            username = vaultSecrets.serviceuserUsername,
+            password = vaultSecrets.serviceuserPassword,
+            stsUrl = env.stsUrl
+        )
+        val pdlClient = PdlClient(
+            httpClient,
+            env.pdlGraphqlPath,
+            PdlClient::class.java.getResource("/graphql/getPerson.graphql").readText().replace(Regex("[\n\t]"), "")
+        )
+        val pdlPersonService = PdlPersonService(pdlClient, stsOidcClient)
+
         val accessTokenClient =
             AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
         val forskutteringsClient =
             ForskutteringsClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
         val narmesteLederClient =
             NarmesteLederClient(env.servicestranglerUrl, env.servicestranglerId, accessTokenClient, httpClient)
+        val utvidetNarmesteLederService = UtvidetNarmesteLederService(narmesteLederClient, pdlPersonService)
 
         routing {
             registerNaisApi(applicationState)
             authenticate {
                 registrerForskutteringApi(forskutteringsClient)
-                registrerNarmesteLederApi(narmesteLederClient)
+                registrerNarmesteLederApi(narmesteLederClient, utvidetNarmesteLederService)
             }
         }
         intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())

@@ -1,4 +1,4 @@
-package no.nav.syfo.narmestelederapi
+package no.nav.syfo.narmesteleder
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.HttpClient
