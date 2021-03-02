@@ -21,6 +21,7 @@ data class Environment(
     val syfomoteadminId: String = getEnvVar("SYFOMOTEADMIN_ID"),
     val syfooppfolgingsplanserviceId: String = getEnvVar("SYFOOPPFOLGINGSPLANSERVICE_ID"),
     val syfosmaltinnId: String = getEnvVar("SYFOSMALTINN_ID"),
+    val sykmeldingerBackendId: String = getEnvVar("SYKMELDINGERBACKEND_ID"),
     val databaseName: String = getEnvVar("DATABASE_NAME", "syfonarmesteleder"),
     val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
