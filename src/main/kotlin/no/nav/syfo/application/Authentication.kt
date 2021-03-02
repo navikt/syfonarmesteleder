@@ -37,7 +37,8 @@ fun harTilgang(credentials: JWTCredential, env: Environment, clientId: String): 
         env.syfobrukertilgangId,
         env.syfomoteadminId,
         env.syfooppfolgingsplanserviceId,
-        env.syfosmaltinnId
+        env.syfosmaltinnId,
+        env.sykmeldingerBackendId
     )
     val appid: String = credentials.payload.getClaim("appid").asString()
     log.debug("authorization attempt for $appid")

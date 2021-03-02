@@ -78,3 +78,5 @@ spec:
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: PDL_GRAPHQL_PATH
       value: https://pdl-api.nais.preprod.local/graphql
+    - name: SYKMELDINGERBACKEND_ID
+      value: cfbe515d-ea06-424d-a29e-43e0f5dfa903
