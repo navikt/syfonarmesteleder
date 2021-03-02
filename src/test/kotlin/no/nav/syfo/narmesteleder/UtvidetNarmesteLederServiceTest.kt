@@ -87,5 +87,14 @@ class UtvidetNarmesteLederServiceTest : Spek({
                 nl2?.navn shouldBeEqualTo null
             }
         }
+        it("Returnerer tom liste hvis bruker ikke har noen nærmeste ledere") {
+            coEvery { narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(any()) } returns emptyList()
+
+            runBlocking {
+                val narmesteLedereMedNavn = utvidetNarmesteLederService.hentNarmesteledereMedNavn(sykmeldtAktorId, callId)
+
+                narmesteLedereMedNavn.size shouldBeEqualTo 0
+            }
+        }
     }
 })

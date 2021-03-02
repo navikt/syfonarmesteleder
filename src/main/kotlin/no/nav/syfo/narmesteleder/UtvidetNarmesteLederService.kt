@@ -9,6 +9,9 @@ class UtvidetNarmesteLederService(private val narmesteLederClient: NarmesteLeder
     suspend fun hentNarmesteledereMedNavn(sykmeldtAktorId: String, callId: String): List<NarmesteLederRelasjon> {
         val narmesteLederRelasjoner = narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId)
         val nlAktorIds = narmesteLederRelasjoner.map { it.narmesteLederAktorId }
+        if (nlAktorIds.isEmpty()) {
+            return emptyList()
+        }
         val nlNavn = pdlPersonService.getPersonnavn(aktorIds = nlAktorIds, callId = callId)
 
         return narmesteLederRelasjoner.map { it.copy(navn = nlNavn[it.narmesteLederAktorId]?.tilString()) }
