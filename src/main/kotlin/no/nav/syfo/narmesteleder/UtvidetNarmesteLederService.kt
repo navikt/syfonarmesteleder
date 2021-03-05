@@ -5,7 +5,10 @@ import no.nav.syfo.pdl.model.Navn
 import no.nav.syfo.pdl.service.PdlPersonService
 
 @KtorExperimentalAPI
-class UtvidetNarmesteLederService(private val narmesteLederClient: NarmesteLederClient, private val pdlPersonService: PdlPersonService) {
+class UtvidetNarmesteLederService(
+    private val narmesteLederClient: NarmesteLederClient,
+    private val pdlPersonService: PdlPersonService
+) {
     suspend fun hentNarmesteledereMedNavn(sykmeldtAktorId: String, callId: String): List<NarmesteLederRelasjon> {
         val narmesteLederRelasjoner = narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId)
         val nlAktorIds = narmesteLederRelasjoner.map { it.narmesteLederAktorId }
@@ -19,9 +22,15 @@ class UtvidetNarmesteLederService(private val narmesteLederClient: NarmesteLeder
 
     private fun Navn.tilString(): String {
         return if (mellomnavn.isNullOrEmpty()) {
-            "$fornavn $etternavn"
+            capitalizeFirstLetter("$fornavn $etternavn")
         } else {
-            "$fornavn $mellomnavn $etternavn"
+            capitalizeFirstLetter("$fornavn $mellomnavn $etternavn")
         }
+    }
+
+    private fun capitalizeFirstLetter(string: String): String {
+        return string.toLowerCase()
+            .split(" ").joinToString(" ") { it.capitalize() }
+            .split("-").joinToString("-") { it.capitalize() }.trimEnd()
     }
 }
