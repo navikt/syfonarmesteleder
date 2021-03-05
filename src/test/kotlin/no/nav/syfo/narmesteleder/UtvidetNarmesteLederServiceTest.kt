@@ -57,8 +57,8 @@ class UtvidetNarmesteLederServiceTest : Spek({
     describe("UtvidetNarmesteLederService") {
         it("Setter riktig navn på ledere") {
             coEvery { pdlPersonService.getPersonnavn(any(), any()) } returns mapOf(
-                Pair(aktorIdLeder1, Navn("Fornavn", null, "Etternavn")),
-                Pair(aktorIdLeder2, Navn("Fornavn2", "Mellomnavn", "Etternavn2"))
+                Pair(aktorIdLeder1, Navn("FORNAVN EKSTRANAVN", null, "ETTERNAVN")),
+                Pair(aktorIdLeder2, Navn("FORNAVN2", "MELLOMNAVN", "BINDESTREK-ETTERNAVN"))
             )
 
             runBlocking {
@@ -66,14 +66,14 @@ class UtvidetNarmesteLederServiceTest : Spek({
 
                 narmesteLedereMedNavn.size shouldBeEqualTo 2
                 val nl1 = narmesteLedereMedNavn.find { it.narmesteLederAktorId == aktorIdLeder1 }
-                nl1?.navn shouldBeEqualTo "Fornavn Etternavn"
+                nl1?.navn shouldBeEqualTo "Fornavn Ekstranavn Etternavn"
                 val nl2 = narmesteLedereMedNavn.find { it.narmesteLederAktorId == aktorIdLeder2 }
-                nl2?.navn shouldBeEqualTo "Fornavn2 Mellomnavn Etternavn2"
+                nl2?.navn shouldBeEqualTo "Fornavn2 Mellomnavn Bindestrek-Etternavn"
             }
         }
         it("Setter null som navn hvis navn mangler i PDL (feiler ikke)") {
             coEvery { pdlPersonService.getPersonnavn(any(), any()) } returns mapOf(
-                Pair(aktorIdLeder1, Navn("Fornavn", null, "Etternavn")),
+                Pair(aktorIdLeder1, Navn("FORNAVN", null, "ETTERNAVN")),
                 Pair(aktorIdLeder2, null)
             )
 
