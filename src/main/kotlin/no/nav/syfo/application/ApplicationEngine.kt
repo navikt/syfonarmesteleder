@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.authenticate
@@ -30,6 +31,7 @@ import no.nav.syfo.AccessTokenClient
 import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
 import no.nav.syfo.application.api.registerNaisApi
+import no.nav.syfo.application.metrics.monitorHttpRequests
 import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.forskuttering.ForskutteringsClient
 import no.nav.syfo.forskuttering.registrerForskutteringApi
@@ -121,5 +123,5 @@ fun createApplicationEngine(
                 registrerNarmesteLederApi(narmesteLederClient, utvidetNarmesteLederService)
             }
         }
-        // intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests()) Filteret må rettes før denne inkluderes igjen! 
+        intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
     }
