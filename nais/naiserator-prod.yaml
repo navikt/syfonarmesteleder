@@ -2,13 +2,25 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: syfonarmesteleder
-  namespace: default
+  namespace: teamsykmelding
   labels:
-    team: teamsykefravr
+    team: teamsykmelding
 spec:
   image: {{ image }}
+  accessPolicy:
+    inbound:
+      external:
+        - host: tt02.altinn.no
+        - host: api-gw-q1.oera.no
+  gcp:
+    sqlInstances:
+      - name: syfonarmesteleder-db-instance
+        type: POSTGRES_12
+        diskSize: 10
+        databases:
+          - name: syfonarmesteleder
+            envVarPrefix: NAIS_DATABASE
   port: 8080
-  team: teamsykefravr
   liveness:
     path: /is_alive
     initialDelay: 30
@@ -35,16 +47,15 @@ spec:
     enabled: true
     path: /prometheus
   ingresses:
-    - "https://syfonarmesteleder.nais.adeo.no"
+    - "https://syfonarmesteleder.intern.nav.no"
+  kafka:
+    pool: nav-prod
   vault:
-    enabled: true
-    paths:
-      - kvPath: /apikey/appdynamics/prod
-        mountPath: /var/run/secrets/nais.io/vault
-      - kvPath: /azuread/data/prod/creds/syfonarmesteleder
-        mountPath: /secrets/azuread/syfonarmesteleder
-      - kvPath: serviceuser/data/prod/srvsyfonarmesteleder
-        mountPath: /secrets/serviceuser
+    enabled: false
+  filesFrom:
+    - secret: syfonarmesteleder-secrets
+  envFrom:
+    - secret: syfonarmesteleder-api-keys
   webproxy: true
   env:
     - name: SERVICESTRANGLER_ID
@@ -71,13 +82,11 @@ spec:
       value: ffdc358b-b97c-470e-a0c8-bf147b5e8561
     - name: JWT_ISSUER
       value: https://sts.windows.net/62366534-1ec3-4962-8869-9b5535279d0b/
-    - name: MOUNT_PATH_VAULT
-      value: /postgresql/prod-fss
-    - name: SYFONARMESTELEDER_DB_URL
-      value: jdbc:postgresql://A01DBVL010.adeo.no:5432/syfonarmesteleder
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
     - name: PDL_GRAPHQL_PATH
       value: https://pdl-api.nais.adeo.no/graphql
     - name: SYKMELDINGERBACKEND_ID
       value: e084350d-f7af-4b29-b573-e01f1a82fc19
+    - name: KAFKA_CLIENT_ID
+      value: syfonarmesteleder

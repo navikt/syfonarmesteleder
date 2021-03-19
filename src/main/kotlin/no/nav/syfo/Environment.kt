@@ -6,7 +6,6 @@ import java.nio.file.Paths
 
 data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
-    val applicationThreads: Int = getEnvVar("APPLICATION_THREADS", "4").toInt(),
     val servicestranglerUrl: String = getEnvVar("SERVICESTRANGLER_URL", "http://syfoservicestrangler"),
     val servicestranglerId: String = getEnvVar("SERVICESTRANGLER_ID"),
     val arbeidsgivertilgangId: String = getEnvVar("ARBEIDSGIVERTILGANG_ID"),
@@ -22,18 +21,24 @@ data class Environment(
     val syfooppfolgingsplanserviceId: String = getEnvVar("SYFOOPPFOLGINGSPLANSERVICE_ID"),
     val syfosmaltinnId: String = getEnvVar("SYFOSMALTINN_ID"),
     val sykmeldingerBackendId: String = getEnvVar("SYKMELDINGERBACKEND_ID"),
-    val databaseName: String = getEnvVar("DATABASE_NAME", "syfonarmesteleder"),
-    val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
-    val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
+    val databaseUsername: String = getEnvVar("NAIS_DATABASE_USERNAME"),
+    val databasePassword: String = getEnvVar("NAIS_DATABASE_PASSWORD"),
+    val dbHost: String = getEnvVar("NAIS_DATABASE_HOST"),
+    val dbPort: String = getEnvVar("NAIS_DATABASE_PORT"),
+    val dbName: String = getEnvVar("NAIS_DATABASE_DATABASE"),
     val pdlGraphqlPath: String = getEnvVar("PDL_GRAPHQL_PATH"),
     val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token")
-)
+) {
+    fun jdbcUrl(): String {
+        return "jdbc:postgresql://$dbHost:$dbPort/$dbName"
+    }
+}
 
 data class VaultSecrets(
-    val clientId: String = getFileAsString("/secrets/azuread/syfonarmesteleder/client_id"),
-    val clientSecret: String = getFileAsString("/secrets/azuread/syfonarmesteleder/client_secret"),
-    val serviceuserUsername: String = getFileAsString("/secrets/serviceuser/username"),
-    val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password")
+    val clientId: String = getFileAsString("/var/run/secrets/AZURE_CLIENT"),
+    val clientSecret: String = getFileAsString("/var/run/secrets/AZURE_CLIENT_SECRET"),
+    val serviceuserUsername: String = getFileAsString("/var/run/secrets/SYFONARMESTELEDER_USERNAME"),
+    val serviceuserPassword: String = getFileAsString("/var/run/secrets/SYFONARMESTELEDER_PASSWORD")
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

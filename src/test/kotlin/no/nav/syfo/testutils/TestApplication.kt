@@ -60,11 +60,14 @@ fun TestApplicationEngine.setUpAuth(): Environment {
         syfomoteadminId = "moteadmin",
         syfooppfolgingsplanserviceId = "oppfolgingsplanservice",
         syfosmaltinnId = "syfosmaltinn",
-        syfonarmestelederDBURL = "",
-        mountPathVault = "",
         pdlGraphqlPath = "graphql",
         stsUrl = "http://sts",
-        sykmeldingerBackendId = "sykmeldinger-backend"
+        sykmeldingerBackendId = "sykmeldinger-backend",
+        databaseUsername = "",
+        databasePassword = "",
+        dbHost = "",
+        dbPort = "",
+        dbName = ""
     )
 
     val path = "src/test/resources/jwkset.json"
