@@ -118,9 +118,9 @@ fun createApplicationEngine(
 
         routing {
             registerNaisApi(applicationState)
+            registrerNarmesteLederApi(narmesteLederClient, utvidetNarmesteLederService)
             authenticate {
                 registrerForskutteringApi(forskutteringsClient)
-                registrerNarmesteLederApi(narmesteLederClient, utvidetNarmesteLederService)
             }
         }
         intercept(ApplicationCallPipeline.Monitoring, monitorHttpRequests())
