@@ -62,6 +62,8 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient, ut
                     val callId = MDC.get("Nav-Callid")
                     call.respond(utvidetNarmesteLederService.hentNarmesteledereMedNavn(sykmeldtAktorId = sykmeldtAktorId, callId = callId))
                 } else {
+                    log.info("Mottatt forespørsel om nærmeste leder-relasjoner for aktor {}", sykmeldtAktorId)
+
                     val narmesteLederRelasjoner =
                         narmesteLederClient.hentNarmesteLedereForSykmeldtFraSyfoserviceStrangler(sykmeldtAktorId)
                     call.respond(narmesteLederRelasjoner)
