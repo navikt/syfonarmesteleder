@@ -69,7 +69,8 @@ fun Route.registrerNarmesteLederApi(narmesteLederClient: NarmesteLederClient, ut
                     call.respond(narmesteLederRelasjoner)
                 }
             } catch (e: IllegalArgumentException) {
-                log.warn("Kan ikke hente nærmeste ledere da aktørid mangler: {}", e.message)
+                val callId = MDC.get("Nav-Callid")
+                log.warn("Kan ikke hente nærmeste ledere da aktørid mangler: callId={} {}", callId, e.message)
                 call.respond(HttpStatusCode.BadRequest, e.message!!)
             }
         }
