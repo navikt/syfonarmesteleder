@@ -36,6 +36,7 @@ spec:
     path: /prometheus
   ingresses:
     - "https://syfonarmesteleder.nais.adeo.no"
+    - "https://syfonarmesteleder.prod-fss-pub.nais.io"
   vault:
     enabled: true
     paths:
