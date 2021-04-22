@@ -26,7 +26,8 @@ data class Environment(
     val syfonarmestelederDBURL: String = getEnvVar("SYFONARMESTELEDER_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
     val pdlGraphqlPath: String = getEnvVar("PDL_GRAPHQL_PATH"),
-    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token")
+    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token"),
+    val narmestelederId: String = getEnvVar("NARMESTELEDER_ID")
 )
 
 data class VaultSecrets(

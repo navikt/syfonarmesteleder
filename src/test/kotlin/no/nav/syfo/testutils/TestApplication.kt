@@ -64,7 +64,8 @@ fun TestApplicationEngine.setUpAuth(): Environment {
         mountPathVault = "",
         pdlGraphqlPath = "graphql",
         stsUrl = "http://sts",
-        sykmeldingerBackendId = "sykmeldinger-backend"
+        sykmeldingerBackendId = "sykmeldinger-backend",
+        narmestelederId = "narmesteleder"
     )
 
     val path = "src/test/resources/jwkset.json"
