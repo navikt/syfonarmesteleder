@@ -82,3 +82,5 @@ spec:
       value: https://pdl-api.nais.adeo.no/graphql
     - name: SYKMELDINGERBACKEND_ID
       value: e084350d-f7af-4b29-b573-e01f1a82fc19
+    - name: NARMESTELEDER_ID
+      value: 046419dd-8baa-4343-b192-a14d7c260b38
