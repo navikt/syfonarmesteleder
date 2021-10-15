@@ -33,7 +33,6 @@ fun harTilgang(credentials: JWTCredential, env: Environment, clientId: String): 
         env.syfosoknadId,
         env.syfovarselId,
         env.arbeidsgivertilgangId,
-        env.modiasyforestId,
         env.syfobrukertilgangId,
         env.syfomoteadminId,
         env.syfooppfolgingsplanserviceId,
