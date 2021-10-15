@@ -55,7 +55,6 @@ fun TestApplicationEngine.setUpAuth(): Environment {
         jwtIssuer = "issuer",
         syfosoknadId = "syfosoknad",
         syfovarselId = "syfovarsel",
-        modiasyforestId = "modiasyforest",
         syfobrukertilgangId = "syfobrukertilgang",
         syfomoteadminId = "moteadmin",
         syfooppfolgingsplanserviceId = "oppfolgingsplanservice",

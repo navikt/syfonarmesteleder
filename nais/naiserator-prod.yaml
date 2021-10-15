@@ -66,8 +66,6 @@ spec:
       value: 54649979-fe0a-4f6c-adfe-8616e4602954
     - name: SYFOOPPFOLGINGSPLANSERVICE_ID
       value: 970b2069-0b53-492f-bd7a-acadfa211e9f
-    - name: MODIASYFOREST_ID
-      value: a14ca2f1-fd72-4f2a-9837-f0aa6a718ffd
     - name: SYFOSMALTINN_ID
       value: ffdc358b-b97c-470e-a0c8-bf147b5e8561
     - name: JWT_ISSUER

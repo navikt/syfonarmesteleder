@@ -16,7 +16,6 @@ data class Environment(
     val jwtIssuer: String = getEnvVar("JWT_ISSUER"),
     val syfosoknadId: String = getEnvVar("SYFOSOKNAD_ID"),
     val syfovarselId: String = getEnvVar("SYFOVARSEL_ID"),
-    val modiasyforestId: String = getEnvVar("MODIASYFOREST_ID"),
     val syfobrukertilgangId: String = getEnvVar("SYFOBRUKERTILGANG_ID"),
     val syfomoteadminId: String = getEnvVar("SYFOMOTEADMIN_ID"),
     val syfooppfolgingsplanserviceId: String = getEnvVar("SYFOOPPFOLGINGSPLANSERVICE_ID"),
