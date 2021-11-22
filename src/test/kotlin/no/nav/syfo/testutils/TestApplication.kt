@@ -49,22 +49,16 @@ fun TestApplicationEngine.setUpAuth(): Environment {
     val env = Environment(
         servicestranglerUrl = "",
         servicestranglerId = "strangler",
-        arbeidsgivertilgangId = "arbeidsgiver",
         aadAccessTokenUrl = "",
         aadDiscoveryUrl = "",
         jwtIssuer = "issuer",
-        syfosoknadId = "syfosoknad",
-        syfovarselId = "syfovarsel",
         syfobrukertilgangId = "syfobrukertilgang",
         syfomoteadminId = "moteadmin",
         syfooppfolgingsplanserviceId = "oppfolgingsplanservice",
-        syfosmaltinnId = "syfosmaltinn",
         syfonarmestelederDBURL = "",
         mountPathVault = "",
         pdlGraphqlPath = "graphql",
-        stsUrl = "http://sts",
-        sykmeldingerBackendId = "sykmeldinger-backend",
-        narmestelederId = "narmesteleder"
+        stsUrl = "http://sts"
     )
 
     val path = "src/test/resources/jwkset.json"

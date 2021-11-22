@@ -62,7 +62,7 @@ class NarmesteLederApiKtTest : Spek({
                             HttpHeaders.Authorization,
                             "Bearer ${
                             generateJWT(
-                                "syfosmaltinn",
+                                "syfobrukertilgang",
                                 "syfonarmesteleder",
                                 subject = "123",
                                 issuer = env.jwtIssuer
@@ -94,7 +94,7 @@ class NarmesteLederApiKtTest : Spek({
                             HttpHeaders.Authorization,
                             "Bearer ${
                             generateJWT(
-                                "syfosmaltinn",
+                                "syfobrukertilgang",
                                 "syfonarmesteleder",
                                 subject = "123",
                                 issuer = env.jwtIssuer
@@ -128,7 +128,7 @@ class NarmesteLederApiKtTest : Spek({
                             HttpHeaders.Authorization,
                             "Bearer ${
                             generateJWT(
-                                "syfosmaltinn",
+                                "syfobrukertilgang",
                                 "syfonarmesteleder",
                                 subject = "123",
                                 issuer = env.jwtIssuer
@@ -148,7 +148,7 @@ class NarmesteLederApiKtTest : Spek({
                             HttpHeaders.Authorization,
                             "Bearer ${
                             generateJWT(
-                                "syfosmaltinn",
+                                "syfobrukertilgang",
                                 "feil",
                                 subject = "123",
                                 issuer = env.jwtIssuer
