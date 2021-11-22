@@ -30,9 +30,7 @@ fun Application.setupAuth(jwkProvider: JwkProvider, env: Environment, vaultSecre
 
 fun harTilgang(credentials: JWTCredential, env: Environment, clientId: String): Boolean {
     val authorizedUsers = listOf(
-        env.syfobrukertilgangId,
-        env.syfomoteadminId,
-        env.syfooppfolgingsplanserviceId
+        env.syfomoteadminId
     )
     val appid: String = credentials.payload.getClaim("appid").asString()
     log.debug("authorization attempt for $appid")

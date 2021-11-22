@@ -54,12 +54,8 @@ spec:
       value: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/token
     - name: AADDISCOVERY_URL
       value: https://login.microsoftonline.com/navno.onmicrosoft.com/.well-known/openid-configuration
-    - name: SYFOBRUKERTILGANG_ID
-      value: 4fe1b104-7c07-4fc1-9d5d-be7ea5232690
     - name: SYFOMOTEADMIN_ID
       value: 54649979-fe0a-4f6c-adfe-8616e4602954
-    - name: SYFOOPPFOLGINGSPLANSERVICE_ID
-      value: 970b2069-0b53-492f-bd7a-acadfa211e9f
     - name: JWT_ISSUER
       value: https://sts.windows.net/62366534-1ec3-4962-8869-9b5535279d0b/
     - name: MOUNT_PATH_VAULT
